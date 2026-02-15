@@ -1,6 +1,7 @@
 package com.maplewood.controller;
 
 import com.maplewood.dto.StudentProfileDTO;
+import com.maplewood.dto.StudentScheduleDTO;
 import com.maplewood.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -19,5 +20,10 @@ public class StudentController {
     @GetMapping("/{id}")
     public StudentProfileDTO getStudentProfile(@PathVariable @NonNull Long id) {
         return studentService.getStudentProfile(id);
+    }
+
+    @GetMapping("/{id}/schedule")
+    public StudentScheduleDTO getStudentSchedule(@PathVariable @NonNull Long id) {
+        return studentService.getStudentSchedule(id);
     }
 }

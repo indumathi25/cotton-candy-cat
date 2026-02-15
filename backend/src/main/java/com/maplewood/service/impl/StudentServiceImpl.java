@@ -1,10 +1,15 @@
 package com.maplewood.service.impl;
 
 import com.maplewood.dto.StudentProfileDTO;
+import com.maplewood.dto.StudentScheduleDTO;
 import com.maplewood.mapper.StudentMapper;
 import com.maplewood.model.CourseHistory;
+import com.maplewood.model.Enrollment;
+import com.maplewood.model.Semester;
 import com.maplewood.model.Student;
 import com.maplewood.repository.CourseHistoryRepository;
+import com.maplewood.repository.EnrollmentRepository;
+import com.maplewood.repository.SemesterRepository;
 import com.maplewood.repository.StudentRepository;
 import com.maplewood.service.StudentService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +24,8 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final CourseHistoryRepository courseHistoryRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final SemesterRepository semesterRepository;
     private final StudentMapper studentMapper;
 
     private static final int CREDITS_TO_GRADUATE = 22;
@@ -31,5 +38,18 @@ public class StudentServiceImpl implements StudentService {
         List<CourseHistory> passedCourses = courseHistoryRepository.findByStudentAndStatus(student, "passed");
 
         return studentMapper.toProfileDTO(student, passedCourses, CREDITS_TO_GRADUATE);
+    }
+
+    @Override
+    public StudentScheduleDTO getStudentSchedule(@NonNull Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        Semester activeSemester = semesterRepository.findByIsActiveTrue()
+                .orElseThrow(() -> new RuntimeException("No active semester found"));
+
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentAndSemester(student, activeSemester);
+
+        return studentMapper.toScheduleDTO(student, enrollments, activeSemester);
     }
 }
