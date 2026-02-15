@@ -7,7 +7,6 @@ import com.maplewood.service.CourseService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -19,6 +18,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public org.springframework.data.domain.Page<CourseDto> getCourses(Integer grade,
             org.springframework.data.domain.Pageable pageable) {
 

@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -95,10 +94,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment enrollment = new Enrollment();
         enrollment.setStudent(student);
         enrollment.setCourseSection(section);
-        enrollment.setEnrollmentDate(LocalDateTime.now());
-        enrollment = enrollmentRepository.save(enrollment);
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
 
-        return enrollmentMapper.toEnrollmentResponseDTO(enrollment, activeSemester.getName());
+        return enrollmentMapper.toEnrollmentResponseDTO(savedEnrollment, activeSemester.getName());
     }
 
     private boolean hasTimeConflict(TimeSlot t1, TimeSlot t2) {

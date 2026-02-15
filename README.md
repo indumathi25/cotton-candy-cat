@@ -1,43 +1,114 @@
-# Cotton Candy Cat - Full Stack Application
+# Maplewood High School - Student Management System
 
-This project is a full-stack application featuring a Spring Boot backend and a React frontend.
+A full-stack web application for managing student enrollment, course scheduling, and academic progress tracking.
 
-## Project Structure
+## Overview
 
-- `backend/`: Spring Boot (Java 17) & SQLite.
-- `frontend/`: React (TypeScript) & Tailwind CSS.
+This system provides course enrollment management and academic tracking for high school students (grades 9-12), featuring real-time validation, GPA calculation, and schedule conflict detection.
+
+## Technology Stack
+
+**Backend**
+- Spring Boot 3.x (Java 17)
+- SQLite with Hibernate ORM
+- Spring Security (HTTP Basic Auth)
+- Maven
+
+**Frontend**
+- React 18 with TypeScript
+- Tailwind CSS
+- npm/Vite
+
+## Prerequisites
+
+- Java 17+
+- Node.js 16+
+- Maven 3.8+
+- Python 3 (for database setup)
+- Docker & Docker Compose (optional)
 
 ## Getting Started
 
-### Prerequisites
-
-- [Docker](https://www.docker.com/products/docker-desktop/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
-
-### Run with Docker (Recommended)
-
-To build and start the entire application stack:
+### 1. Setup Database
 
 ```bash
-docker compose up --build
+# From project root
+python3 populate_database.py
+cp maplewood_school.sqlite backend/
 ```
 
-- **Frontend**: [http://localhost](http://localhost)
-- **Backend**: [http://localhost:8080](http://localhost:8080)
+### 2. Run Backend
 
-### Manual Setup (Development)
-
-#### Backend
 ```bash
 cd backend
 ./mvnw spring-boot:run
 ```
 
-#### Frontend
+API available at: `http://localhost:8080`
+
+### 3. Run Frontend
+
 ```bash
 cd frontend
 npm install
-npm start
+npm run dev
 ```
 
-## Documentation
-Additional details can be found in the [walkthrough.md](.gemini/antigravity/brain/ccf70b74-64da-4fbd-b85a-a9458da96be4/walkthrough.md) (if available).
+App available at: `http://localhost:3000`
+
+### Docker Deployment
+
+```bash
+docker compose up --build
+```
+
+- Frontend: `http://localhost`
+- Backend: `http://localhost:8080`
+
+## Authentication
+
+| Role    | Username  | Password   |
+|---------|-----------|------------|
+| ADMIN   | `admin`   | `admin`    |
+| STUDENT | `student` | `password` |
+
+## API Documentation
+
+See [`backend/README.md`](backend/README.md) for detailed API testing guide.
+
+**Quick Test:**
+```bash
+curl -u admin:admin http://localhost:8080/api/students/101 | jq
+```
+
+## Project Structure
+
+```
+cotton-candy-cat/
+├── backend/              # Spring Boot API
+│   ├── src/main/java/com/maplewood/
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── repository/
+│   │   ├── model/
+│   │   └── config/
+│   └── pom.xml
+├── frontend/             # React App
+│   ├── src/
+│   └── package.json
+├── populate_database.py
+└── docker-compose.yml
+```
+
+## Best Practices
+
+- **Transaction Management**: All write operations use `@Transactional` for data consistency
+- **Input Validation**: Request DTOs validated with Jakarta Validation
+- **Error Handling**: Centralized exception handling with meaningful error messages
+- **Security**: Role-based access control on all endpoints
+- **Code Organization**: Clean architecture with separated layers (Controller → Service → Repository)
+- **Testing**: Run `./mvnw test` (backend) and `npm test` (frontend) before deployment
+
+## License
+
+Created for educational purposes.

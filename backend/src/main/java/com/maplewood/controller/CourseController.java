@@ -1,6 +1,7 @@
 package com.maplewood.controller;
 
 import com.maplewood.dto.CourseDto;
+import com.maplewood.dto.PageResponse;
 import com.maplewood.service.CourseService;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +16,9 @@ public class CourseController {
     }
 
     @GetMapping
-    public org.springframework.data.domain.Page<CourseDto> getCourses(
+    public PageResponse<CourseDto> getCourses(
             @RequestParam(required = false) Integer grade,
             org.springframework.data.domain.Pageable pageable) {
-        return courseService.getCourses(grade, pageable);
+        return PageResponse.of(courseService.getCourses(grade, pageable));
     }
 }

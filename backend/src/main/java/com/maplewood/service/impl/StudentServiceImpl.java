@@ -25,43 +25,46 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
 
-    private final StudentRepository studentRepository;
-    private final CourseHistoryRepository courseHistoryRepository;
-    private final EnrollmentRepository enrollmentRepository;
-    private final SemesterRepository semesterRepository;
-    private final StudentMapper studentMapper;
-    private final AcademicCalculator academicCalculator;
+        private final StudentRepository studentRepository;
+        private final CourseHistoryRepository courseHistoryRepository;
+        private final EnrollmentRepository enrollmentRepository;
+        private final SemesterRepository semesterRepository;
+        private final StudentMapper studentMapper;
+        private final AcademicCalculator academicCalculator;
 
-    @Override
-    public StudentProfileDTO getStudentProfile(@NonNull Long id) {
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
+        @Override
+        @org.springframework.transaction.annotation.Transactional(readOnly = true)
+        public StudentProfileDTO getStudentProfile(@NonNull Long id) {
+                Student student = studentRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
 
-        List<CourseHistory> history = courseHistoryRepository.findByStudent(student);
+                List<CourseHistory> history = courseHistoryRepository.findByStudent(student);
 
-        // Filter for passed courses for GPA and credit calculation
-        List<CourseHistory> passedCourses = history.stream()
-                .filter(ch -> "passed".equalsIgnoreCase(ch.getStatus()))
-                .collect(Collectors.toList());
+                // Filter for passed courses for GPA and credit calculation
+                List<CourseHistory> passedCourses = history.stream()
+                                .filter(ch -> "passed".equalsIgnoreCase(ch.getStatus()))
+                                .collect(Collectors.toList());
 
-        // Standard requirement: 22 credits to graduate (example value)
-        int creditsToGraduate = 22;
+                // Standard requirement: 22 credits to graduate (example value)
+                int creditsToGraduate = 22;
 
-        double gpa = academicCalculator.calculateGPA(passedCourses);
+                double gpa = academicCalculator.calculateGPA(passedCourses);
 
-        return studentMapper.toProfileDTO(student, passedCourses, creditsToGraduate, gpa);
-    }
+                return studentMapper.toProfileDTO(student, passedCourses, creditsToGraduate, gpa);
+        }
 
-    @Override
-    public StudentScheduleDTO getStudentSchedule(@NonNull Long studentId) {
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
+        @Override
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
+        public StudentScheduleDTO getStudentSchedule(@NonNull Long studentId) {
+                Student student = studentRepository.findById(studentId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Student not found with id: " + studentId));
 
-        Semester activeSemester = semesterRepository.findByIsActiveTrue()
-                .orElseThrow(() -> new ResourceNotFoundException("No active semester found"));
+                Semester activeSemester = semesterRepository.findByIsActiveTrue()
+                                .orElseThrow(() -> new ResourceNotFoundException("No active semester found"));
 
-        List<Enrollment> enrollments = enrollmentRepository.findByStudentAndSemester(student, activeSemester);
+                List<Enrollment> enrollments = enrollmentRepository.findByStudentAndSemester(student, activeSemester);
 
-        return studentMapper.toScheduleDTO(student, enrollments, activeSemester);
-    }
+                return studentMapper.toScheduleDTO(student, enrollments, activeSemester);
+        }
 }
