@@ -18,7 +18,8 @@ public class EnrollmentController {
     private final EnrollmentService enrollmentService;
 
     @PostMapping
-    public ResponseEntity<EnrollmentResponseDTO> enroll(@RequestBody EnrollmentRequestDTO request) {
+    public ResponseEntity<EnrollmentResponseDTO> enroll(
+            @jakarta.validation.Valid @RequestBody EnrollmentRequestDTO request) {
         EnrollmentResponseDTO response = enrollmentService.enrollStudent(request);
         if ("FAILED".equals(response.getStatus())) {
             return ResponseEntity.badRequest().body(response);
