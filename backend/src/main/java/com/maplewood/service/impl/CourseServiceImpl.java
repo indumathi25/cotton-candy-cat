@@ -19,21 +19,20 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseDto> getCourses(Integer grade) {
+    public org.springframework.data.domain.Page<CourseDto> getCourses(Integer grade,
+            org.springframework.data.domain.Pageable pageable) {
 
-        List<Course> courses;
+        org.springframework.data.domain.Page<Course> courses;
 
         if (grade != null) {
             courses = courseRepository
                     .findByGradeLevelMinLessThanEqualAndGradeLevelMaxGreaterThanEqual(
-                            grade, grade);
+                            grade, grade, pageable);
         } else {
-            courses = courseRepository.findAll();
+            courses = courseRepository.findAll(pageable);
         }
 
-        return courses.stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+        return courses.map(this::toDto);
     }
 
     private CourseDto toDto(Course course) {

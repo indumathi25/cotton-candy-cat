@@ -7,7 +7,10 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "enrollments")
+@Table(name = "enrollments", indexes = {
+        @Index(name = "idx_enrollment_student", columnList = "student_id"),
+        @Index(name = "idx_enrollment_section", columnList = "course_section_id")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
