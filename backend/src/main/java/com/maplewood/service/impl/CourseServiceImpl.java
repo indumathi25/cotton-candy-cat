@@ -37,13 +37,17 @@ public class CourseServiceImpl implements CourseService {
     }
 
     private CourseDto toDto(Course course) {
+        List<Long> prereqs = course.getPrerequisiteId() != null
+                ? List.of(course.getPrerequisiteId())
+                : List.of();
+
         return CourseDto.builder()
                 .id(course.getId())
                 .name(course.getName())
                 .credits(course.getCredits())
                 .minGrade(course.getGradeLevelMin())
                 .maxGrade(course.getGradeLevelMax())
-                .prerequisiteIds(List.of()) // populated later
+                .prerequisiteIds(prereqs)
                 .build();
     }
 }
