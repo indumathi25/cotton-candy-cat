@@ -2,6 +2,7 @@ package com.maplewood.service.impl;
 
 import com.maplewood.dto.EnrollmentRequestDTO;
 import com.maplewood.dto.EnrollmentResponseDTO;
+import com.maplewood.exception.ResourceNotFoundException;
 import com.maplewood.mapper.EnrollmentMapper;
 import com.maplewood.model.*;
 import com.maplewood.repository.*;
@@ -28,13 +29,15 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Transactional
     public EnrollmentResponseDTO enrollStudent(EnrollmentRequestDTO request) {
         Student student = studentRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Student not found with id: " + request.getStudentId()));
 
         CourseSection section = courseSectionRepository.findById(request.getCourseSectionId())
-                .orElseThrow(() -> new RuntimeException("Course section not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Course section not found with id: " + request.getCourseSectionId()));
 
         Semester activeSemester = semesterRepository.findByIsActiveTrue()
-                .orElseThrow(() -> new RuntimeException("No active semester found"));
+                .orElseThrow(() -> new ResourceNotFoundException("No active semester found"));
 
         // 1. Semester Validation
         if (!section.getSemester().getId().equals(activeSemester.getId())) {
