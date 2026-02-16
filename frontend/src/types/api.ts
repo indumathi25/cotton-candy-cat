@@ -15,7 +15,7 @@ export interface ScheduleItem {
     courseName: string;
     courseCode: string;
     teacherName: string;
-    classroomId: string;
+    classroomId: number;
     dayOfWeek: string;
     startTime: string;
     endTime: string;

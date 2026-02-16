@@ -1,4 +1,5 @@
 import React from 'react';
+import { GRADE_LEVELS } from '../../../constants';
 
 interface CourseFiltersProps {
     selectedGrade: number | null;
@@ -11,7 +12,7 @@ export const CourseFilters: React.FC<CourseFiltersProps> = ({
     onGradeChange,
     studentGradeLevel,
 }) => {
-    const grades = [9, 10, 11, 12];
+    const grades = GRADE_LEVELS;
 
     return (
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
@@ -20,8 +21,8 @@ export const CourseFilters: React.FC<CourseFiltersProps> = ({
                 <button
                     onClick={() => onGradeChange(null)}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${selectedGrade === null
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                     aria-label="Show all grades"
                 >
@@ -32,10 +33,10 @@ export const CourseFilters: React.FC<CourseFiltersProps> = ({
                         key={grade}
                         onClick={() => onGradeChange(grade)}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${selectedGrade === grade
-                                ? 'bg-blue-600 text-white'
-                                : grade === studentGradeLevel
-                                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-blue-600 text-white'
+                            : grade === studentGradeLevel
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
                         aria-label={`Filter by grade ${grade}${grade === studentGradeLevel ? ' (your grade)' : ''}`}
                     >

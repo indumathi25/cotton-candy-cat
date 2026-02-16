@@ -1,17 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CourseWithEnrollmentStatus } from '../../../types/course';
 import { Card, Button } from '../../common';
 import { getEnrollmentBlockMessage } from '../../../utils/enrollmentValidation';
 
 interface CourseCardProps {
     course: CourseWithEnrollmentStatus;
-    onEnroll: (courseId: number) => void;
+    onEnroll: (courseId: number) => Promise<void> | void;
 }
 
 export const CourseCard: React.FC<CourseCardProps> = ({ course, onEnroll }) => {
-    const handleEnroll = () => {
-        if (course.canEnroll) {
-            onEnroll(course.id);
+    const [isEnrolling, setIsEnrolling] = useState(false);
+
+    const handleEnrollClick = async () => {
+        setIsEnrolling(true);
+        try {
+            await onEnroll(course.id);
+        } finally {
+            setIsEnrolling(false);
         }
     };
 
@@ -59,18 +64,19 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onEnroll }) => {
 
                 {/* Course Description */}
                 {course.description && (
-                    <p className="text-sm text-gray-700 line-clamp-3">{course.description}</p>
+                    <p className="text-sm text-gray-700 line-clamp-3 mb-4">{course.description}</p>
                 )}
 
                 {/* Block Message */}
                 {!course.canEnroll && blockMessage && (
-                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                         <p className="text-sm text-yellow-800">
                             <span className="font-medium">⚠️ Cannot enroll: </span>
                             {blockMessage}
                         </p>
                     </div>
                 )}
+
             </div>
 
             {/* Action Button */}
@@ -78,11 +84,16 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onEnroll }) => {
                 <Button
                     variant={course.canEnroll ? 'primary' : 'secondary'}
                     fullWidth
-                    onClick={handleEnroll}
+                    onClick={handleEnrollClick}
+                    isLoading={isEnrolling}
                     disabled={!course.canEnroll}
-                    aria-label={course.canEnroll ? `Enroll in ${course.name}` : `Cannot enroll in ${course.name}`}
+                    aria-label={course.canEnroll ? `Add ${course.name} to schedule` : `Cannot enroll in ${course.name}`}
                 >
-                    {course.canEnroll ? '➕ Add Course' : '🔒 Cannot Enroll'}
+                    {course.canEnroll ? (
+                        <>
+                            <span className="mr-1">+</span> Add to Schedule
+                        </>
+                    ) : '🔒 Cannot Enroll'}
                 </Button>
             </div>
         </Card>

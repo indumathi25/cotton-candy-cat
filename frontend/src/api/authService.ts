@@ -1,4 +1,4 @@
-import apiClient, { setAuthCredentials, clearAuthCredentials } from './client';
+import apiClient, { setAuthCredentials, clearAuthCredentials, getAuthCredentials } from './client';
 import { User, UserRole } from '../types/auth';
 
 
@@ -35,9 +35,9 @@ export const login = async (
     }
 };
 
-/**
- * Logout and clear credentials
- */
+
 export const logout = (): void => {
     clearAuthCredentials();
 };
+
+export { getAuthCredentials };
