@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { StudentDashboardPage } from './pages/StudentDashboardPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { CoursesPage } from './pages/CoursesPage';
 
 const App: React.FC = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -31,6 +32,14 @@ const App: React.FC = () => {
         element={
           <ProtectedRoute role="STUDENT">
             <StudentDashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/courses"
+        element={
+          <ProtectedRoute role="STUDENT">
+            <CoursesPage />
           </ProtectedRoute>
         }
       />

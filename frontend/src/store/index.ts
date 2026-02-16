@@ -4,10 +4,14 @@ import storage from 'redux-persist/lib/storage'; // defaults to localStorage
 import { combineReducers } from '@reduxjs/toolkit';
 import authReducer from './authSlice';
 import uiReducer from './uiSlice';
+import coursesReducer from './coursesSlice';
+import studentReducer from './studentSlice';
 
 const rootReducer = combineReducers({
     auth: authReducer,
     ui: uiReducer,
+    courses: coursesReducer,
+    student: studentReducer,
 });
 
 const persistConfig = {
