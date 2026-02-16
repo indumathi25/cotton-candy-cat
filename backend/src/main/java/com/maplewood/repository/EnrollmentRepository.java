@@ -26,4 +26,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     long countByStudentAndSemester(Student student, Semester semester);
 
     boolean existsByStudentAndCourseSection(Student student, CourseSection courseSection);
+
+    @Query("SELECT e FROM Enrollment e " +
+            "JOIN FETCH e.courseSection cs " +
+            "JOIN FETCH cs.course c " +
+            "JOIN FETCH cs.teacher t " +
+            "JOIN FETCH cs.semester s " +
+            "WHERE e.student.id = :studentId")
+    List<Enrollment> findByStudentId(Long studentId);
 }

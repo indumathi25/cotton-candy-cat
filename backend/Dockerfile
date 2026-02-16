@@ -9,10 +9,12 @@ RUN mvn clean package -DskipTests
 # Run stage
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
 
-# Create a directory for the SQLite database
-RUN mkdir -p /app/data
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Copy the jar file
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

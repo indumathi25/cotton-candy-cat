@@ -1,3 +1,8 @@
+# Database files
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
 # IDEs
 .vscode/
 .idea/
@@ -20,3 +25,13 @@ yarn-error.log*
 # Temp
 tmp/
 temp/
+
+# Backend
+backend/target/
+backend/.mvn/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+

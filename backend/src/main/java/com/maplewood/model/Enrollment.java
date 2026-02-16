@@ -27,6 +27,9 @@ public class Enrollment {
     @JoinColumn(name = "course_section_id", nullable = false)
     private CourseSection courseSection;
 
-    @Column(name = "enrollment_date")
-    private LocalDateTime enrollmentDate;
+    @Column(name = "enrolled_at")
+    private LocalDateTime enrolledAt;
+
+    @Column(name = "grade", length = 2)
+    private String grade;
 }

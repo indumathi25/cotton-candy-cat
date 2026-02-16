@@ -21,4 +21,9 @@ public class CourseController {
             org.springframework.data.domain.Pageable pageable) {
         return PageResponse.of(courseService.getCourses(grade, pageable));
     }
+
+    @GetMapping("/{courseId}/sections")
+    public java.util.List<com.maplewood.dto.CourseSectionDto> getCourseSections(@PathVariable Long courseId) {
+        return courseService.getCourseSections(courseId);
+    }
 }

@@ -19,10 +19,10 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "code", nullable = false, unique = true)
     private String code;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "specialization_id")
@@ -45,6 +45,9 @@ public class Course {
 
     @Column(name = "grade_level_max", nullable = false)
     private Integer gradeLevelMax;
+
+    @Column(name = "course_type", nullable = false)
+    private String courseType;
 
     @Column(columnDefinition = "TEXT")
     private String description;

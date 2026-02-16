@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -13,9 +12,13 @@ import java.util.List;
 public class CourseDto {
 
     private Long id;
+    private String code;
     private String name;
-    private int credits;
-    private int minGrade;
-    private int maxGrade;
-    private List<Long> prerequisiteIds;
+    private String description;
+    private Integer credits;
+    private Integer gradeLevelMin;
+    private Integer gradeLevelMax;
+    private Integer hoursPerWeek;
+    private Integer semesterOrder;
+    private Long prerequisiteId;
 }

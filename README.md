@@ -34,36 +34,33 @@ This system provides course enrollment management and academic tracking for high
 ```bash
 # From project root
 python3 populate_database.py
-cp maplewood_school.sqlite backend/
 ```
 
-### 2. Run Backend
+> **Note**: The script creates `maplewood_school.sqlite` in the project root. Docker Compose automatically mounts it from there.
 
-```bash
-cd backend
-./mvnw spring-boot:run
-```
-
-API available at: `http://localhost:8080`
-
-### 3. Run Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-App available at: `http://localhost:3000`
-
-### Docker Deployment
+### 2. Run with Docker (Recommended)
 
 ```bash
 docker compose up --build
 ```
 
-- Frontend: `http://localhost`
-- Backend: `http://localhost:8080`
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:8080`
+
+### Alternative: Run Locally
+
+**Backend:**
+```bash
+cd backend
+./mvnw spring-boot:run
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ## Authentication
 

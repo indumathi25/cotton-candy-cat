@@ -26,4 +26,9 @@ public class StudentController {
     public StudentScheduleDTO getStudentSchedule(@PathVariable @NonNull Long id) {
         return studentService.getStudentSchedule(id);
     }
+
+    @GetMapping("/{id}/history")
+    public com.maplewood.dto.StudentCourseHistoryDTO getStudentHistory(@PathVariable @NonNull Long id) {
+        return studentService.getStudentCourseHistory(id);
+    }
 }

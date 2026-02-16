@@ -12,9 +12,11 @@ import java.util.List;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
 
-    List<Course> findByGradeLevelMinLessThanEqualAndGradeLevelMaxGreaterThanEqual(
-            int grade1, int grade2);
+        List<Course> findByGradeLevelMinLessThanEqualAndGradeLevelMaxGreaterThanEqual(
+                        int grade1, int grade2);
 
-    Page<Course> findByGradeLevelMinLessThanEqualAndGradeLevelMaxGreaterThanEqual(
-            int grade1, int grade2, Pageable pageable);
+        Page<Course> findByGradeLevelMinLessThanEqualAndGradeLevelMaxGreaterThanEqual(
+                        int grade1, int grade2, Pageable pageable);
+
+        long countByCourseType(String courseType);
 }

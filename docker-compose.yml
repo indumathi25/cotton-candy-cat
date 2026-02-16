@@ -5,23 +5,39 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: maplewood-backend
     ports:
       - "8080:8080"
     volumes:
-      - backend-data:/app/data
+      - ./database/maplewood_school.sqlite:/app/maplewood_school.sqlite
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:sqlite:/app/data/maplewood_school.sqlite
-    restart: always
+      - SPRING_DATASOURCE_URL=jdbc:sqlite:maplewood_school.sqlite?journal_mode=WAL&busy_timeout=5000
+    networks:
+      - maplewood-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "-u", "admin:admin", "http://localhost:8080/api/courses?size=1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=http://localhost:8080
+    container_name: maplewood-frontend
     ports:
-      - "80:80"
+      - "3000:80"
     depends_on:
-      - backend
-    restart: always
+      backend:
+        condition: service_healthy
+    networks:
+      - maplewood-network
+    restart: unless-stopped
 
-volumes:
-  backend-data:
+networks:
+  maplewood-network:
+    driver: bridge
