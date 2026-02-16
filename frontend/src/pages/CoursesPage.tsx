@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CourseBrowser } from '../components/features/courses/CourseBrowser';
-import { DashboardLayout } from '../components/layouts/DashboardLayout';
+import { StudentLayout } from '../components/layouts/StudentLayout';
 import { selectUser } from '../store/authSlice';
 import { selectCourseHistory } from '../store/studentSlice';
 import { StudentCourseHistory } from '../types/student';
@@ -25,10 +25,8 @@ export const CoursesPage: React.FC = () => {
     };
 
     return (
-        <DashboardLayout
+        <StudentLayout
             title="Browse Courses"
-            welcomeMessage={`Find Your Next Course, ${user?.username}!`}
-            subtitle="Explore available courses and build your schedule"
         >
             <CourseBrowser
                 selectedGrade={selectedGrade}
@@ -36,6 +34,6 @@ export const CoursesPage: React.FC = () => {
                 courseHistory={mockCourseHistory}
                 onEnroll={handleEnroll}
             />
-        </DashboardLayout>
+        </StudentLayout>
     );
 };

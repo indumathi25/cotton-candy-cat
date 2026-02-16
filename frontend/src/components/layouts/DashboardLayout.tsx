@@ -6,6 +6,7 @@ interface DashboardLayoutProps {
     title: string;
     welcomeMessage?: string;
     subtitle?: string;
+    navBar?: ReactNode;
     children: ReactNode;
 }
 
@@ -13,6 +14,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     title,
     welcomeMessage,
     subtitle,
+    navBar,
     children,
 }) => {
     const { logout } = useAuth();
@@ -35,6 +37,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         </Button>
                     </div>
                 </div>
+                {/* Navigation Bar */}
+                {navBar && navBar}
             </header>
 
             {/* Main Content */}

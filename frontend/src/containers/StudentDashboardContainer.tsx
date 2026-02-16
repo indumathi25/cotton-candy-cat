@@ -5,7 +5,7 @@ import { useStudentProfile, useStudentSchedule } from '../hooks/useStudentData';
 import { ProfileCard } from '../components/features/student/ProfileCard';
 import { ScheduleTable } from '../components/features/student/ScheduleTable';
 import { LoadingSkeleton, ErrorMessage } from '../components/common';
-import { DashboardLayout } from '../components/layouts/DashboardLayout';
+import { StudentLayout } from '../components/layouts/StudentLayout';
 
 export const StudentDashboardContainer: React.FC = () => {
     const { user } = useAuth();
@@ -27,10 +27,8 @@ export const StudentDashboardContainer: React.FC = () => {
     } = useStudentSchedule(studentId);
 
     return (
-        <DashboardLayout
+        <StudentLayout
             title="Student Dashboard"
-            welcomeMessage={`Welcome back, ${user?.username}!`}
-            subtitle="Here's your academic overview"
         >
             {/* Profile Section */}
             <section aria-labelledby="profile-heading" className="mb-8">
@@ -94,6 +92,6 @@ export const StudentDashboardContainer: React.FC = () => {
                     <ScheduleTable schedule={schedule} />
                 ) : null}
             </section>
-        </DashboardLayout>
+        </StudentLayout>
     );
 };

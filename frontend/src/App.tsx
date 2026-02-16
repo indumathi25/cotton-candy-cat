@@ -7,6 +7,9 @@ import { LoginPage } from './pages/LoginPage';
 import { StudentDashboardPage } from './pages/StudentDashboardPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { CoursesPage } from './pages/CoursesPage';
+import { StudentSchedulePage } from './pages/StudentSchedulePage';
+import { StudentGradesPage } from './pages/StudentGradesPage';
+import { StudentProfilePage } from './pages/StudentProfilePage';
 
 const App: React.FC = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -40,6 +43,30 @@ const App: React.FC = () => {
         element={
           <ProtectedRoute role="STUDENT">
             <CoursesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/schedule"
+        element={
+          <ProtectedRoute role="STUDENT">
+            <StudentSchedulePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/grades"
+        element={
+          <ProtectedRoute role="STUDENT">
+            <StudentGradesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/profile"
+        element={
+          <ProtectedRoute role="STUDENT">
+            <StudentProfilePage />
           </ProtectedRoute>
         }
       />
