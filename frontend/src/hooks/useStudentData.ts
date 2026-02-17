@@ -6,7 +6,6 @@ export const useStudentProfile = (id: number): UseQueryResult<StudentProfile, Er
     return useQuery({
         queryKey: ['studentProfile', id],
         queryFn: () => getStudentProfile(id),
-        staleTime: 5 * 60 * 1000, // 5 minutes
         retry: 1,
     });
 };
@@ -15,7 +14,6 @@ export const useStudentSchedule = (id: number): UseQueryResult<StudentSchedule, 
     return useQuery({
         queryKey: ['studentSchedule', id],
         queryFn: () => getStudentSchedule(id),
-        staleTime: 5 * 60 * 1000,
         retry: 1,
     });
 };
@@ -28,7 +26,6 @@ export const useCourses = (
     return useQuery({
         queryKey: ['courses', grade, page, size],
         queryFn: () => getCourses(grade, page, size),
-        staleTime: 10 * 60 * 1000, // 10 minutes
         retry: 1,
     });
 };

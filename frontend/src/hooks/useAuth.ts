@@ -17,8 +17,8 @@ export const useAuth = (): UseAuthReturn => {
     const user = useSelector(selectUser);
     const isAuthenticated = useSelector(selectIsAuthenticated);
 
-    const login = async (username: string, password: string, role: UserRole): Promise<void> => {
-        const user = await loginService(username, password, role);
+    const login = async (username: string, password: string, role: UserRole, studentId?: number): Promise<void> => {
+        const user = await loginService(username, password, role, studentId);
         dispatch(setUser({ user, credentials: { username, password } }));
 
         // Navigate to appropriate dashboard

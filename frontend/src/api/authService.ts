@@ -5,7 +5,8 @@ import { User, UserRole } from '../types/auth';
 export const login = async (
     username: string,
     password: string,
-    role: UserRole
+    role: UserRole,
+    studentIdOverride?: number
 ): Promise<User> => {
     try {
         // Set credentials for basic auth
@@ -16,7 +17,7 @@ export const login = async (
         if (role === 'STUDENT') {
             // Test with student ID 101 (has course history)
             // In production, backend would return the student ID on login
-            studentId = 101;
+            studentId = studentIdOverride || 101;
 
             await apiClient.get(`/api/students/${studentId}`);
         } else {

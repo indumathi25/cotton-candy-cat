@@ -8,11 +8,13 @@ export const LoginContainer: React.FC = () => {
     const {
         username,
         password,
+        studentId,
         role,
         error,
         isLoading,
         setUsername,
         setPassword,
+        setStudentId,
         setRole,
         fillDemoCredentials,
         handleSubmit,
@@ -22,11 +24,13 @@ export const LoginContainer: React.FC = () => {
         <LoginForm
             username={username}
             password={password}
+            studentId={studentId}
             role={role}
             error={error}
             isLoading={isLoading}
             onUsernameChange={setUsername}
             onPasswordChange={setPassword}
+            onStudentIdChange={setStudentId}
             onRoleChange={setRole}
             onSubmit={handleSubmit(login)}
             onFillDemo={fillDemoCredentials}

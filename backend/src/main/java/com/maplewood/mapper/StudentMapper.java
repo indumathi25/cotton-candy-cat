@@ -26,7 +26,6 @@ public class StudentMapper {
                         int creditsToGraduate,
                         double gpa) {
                 // total credits the student has already earned
-                // total credits the student has already earned
                 int creditsEarned = academicCalculator.calculateCreditsEarned(passedCourses);
                 // how many credits are still needed to graduate
                 int remainingCredits = academicCalculator.calculateRemainingCredits(creditsToGraduate, creditsEarned);

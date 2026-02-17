@@ -5,11 +5,13 @@ import { UserRole } from '../../../types/auth';
 interface LoginFormProps {
     username: string;
     password: string;
+    studentId: string;
     role: UserRole;
     error: string;
     isLoading: boolean;
     onUsernameChange: (value: string) => void;
     onPasswordChange: (value: string) => void;
+    onStudentIdChange: (value: string) => void;
     onRoleChange: (value: UserRole) => void;
     onSubmit: (e: FormEvent) => void;
     onFillDemo: (role: UserRole) => void;
@@ -18,11 +20,13 @@ interface LoginFormProps {
 export const LoginForm: React.FC<LoginFormProps> = ({
     username,
     password,
+    studentId,
     role,
     error,
     isLoading,
     onUsernameChange,
     onPasswordChange,
+    onStudentIdChange,
     onRoleChange,
     onSubmit,
     onFillDemo,
@@ -61,6 +65,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                         autoComplete="current-password"
                         aria-required="true"
                     />
+
+                    {role === 'STUDENT' && (
+                        <Input
+                            label="Student ID (for demo)"
+                            type="text"
+                            value={studentId}
+                            onChange={(e) => onStudentIdChange(e.target.value)}
+                            placeholder="Enter student ID (e.g. 101)"
+                            required
+                            aria-required="true"
+                        />
+                    )}
 
                     {/* Role Selection */}
                     <div className="mb-6">

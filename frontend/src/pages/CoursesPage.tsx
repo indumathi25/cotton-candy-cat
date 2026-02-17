@@ -8,10 +8,12 @@ import { StudentCourseHistory } from '../types/student';
 import { fetchCourseSections, enrollStudent } from '../store/coursesSlice';
 import { AppDispatch } from '../store';
 import { Modal } from '../components/common';
+import { useQueryClient } from '@tanstack/react-query';
 
 
 export const CoursesPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
+    const queryClient = useQueryClient();
     const user = useSelector(selectUser);
     const courseHistory = useSelector(selectCourseHistory);
     const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
@@ -82,8 +84,14 @@ export const CoursesPage: React.FC = () => {
                 type: 'success'
             });
 
-            // Refetch schedule to update "Active/Enrolled" status on cards
+            // Refetch Redux history
             dispatch(fetchCourseHistory(user.studentId));
+
+            // Reset React Query caches for Dashboard (forces refetch on next use)
+            await Promise.all([
+                queryClient.resetQueries({ queryKey: ['studentSchedule'], exact: false }),
+                queryClient.resetQueries({ queryKey: ['studentProfile'], exact: false })
+            ]);
 
         } catch (err: any) {
             console.error("Enrollment failed", err);
