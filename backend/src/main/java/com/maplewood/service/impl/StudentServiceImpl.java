@@ -1,28 +1,24 @@
 package com.maplewood.service.impl;
 
-import com.maplewood.dto.StudentProfileDTO;
-import com.maplewood.dto.StudentScheduleDTO;
+import com.maplewood.dto.*;
 import com.maplewood.exception.ResourceNotFoundException;
 import com.maplewood.mapper.StudentMapper;
-import com.maplewood.model.CourseHistory;
-import com.maplewood.model.Enrollment;
-import com.maplewood.model.Semester;
-import com.maplewood.model.Student;
-import com.maplewood.repository.CourseHistoryRepository;
-import com.maplewood.repository.EnrollmentRepository;
-import com.maplewood.repository.SemesterRepository;
-import com.maplewood.repository.StudentRepository;
+import com.maplewood.model.*;
+import com.maplewood.repository.*;
 import com.maplewood.service.StudentService;
 import com.maplewood.util.AcademicCalculator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true) // Apply to all methods
 public class StudentServiceImpl implements StudentService {
 
         private final StudentRepository studentRepository;
@@ -33,90 +29,99 @@ public class StudentServiceImpl implements StudentService {
         private final AcademicCalculator academicCalculator;
 
         @Override
-        @org.springframework.transaction.annotation.Transactional(readOnly = true)
-        public StudentProfileDTO getStudentProfile(@NonNull Long id) {
-                Student student = studentRepository.findById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
+        public StudentProfileDTO getStudentProfile(Long studentId) {
+                Student student = fetchStudent(studentId);
 
-                List<CourseHistory> history = courseHistoryRepository.findByStudent(student);
+                List<CourseHistory> history = courseHistoryRepository.findByStudentId(studentId);
 
-                // Filter for passed courses for GPA and credit calculation
                 List<CourseHistory> passedCourses = history.stream()
-                                .filter(ch -> "passed".equalsIgnoreCase(ch.getStatus()))
-                                .collect(Collectors.toList());
+                                .filter(ch -> CourseStatus.passed.equals(ch.getStatus()))
+                                .toList();
 
-                // Standard requirement: 22 credits to graduate (example value)
                 int creditsToGraduate = 22;
-
-                double gpa = academicCalculator.calculateGPA(passedCourses);
+                double gpa = academicCalculator.calculateGPA(history);
 
                 return studentMapper.toProfileDTO(student, passedCourses, creditsToGraduate, gpa);
         }
 
         @Override
-        @org.springframework.transaction.annotation.Transactional(readOnly = true)
-        public StudentScheduleDTO getStudentSchedule(@NonNull Long studentId) {
-                Student student = studentRepository.findById(studentId)
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Student not found with id: " + studentId));
+        public StudentScheduleDTO getStudentSchedule(Long studentId) {
+                Student student = fetchStudent(studentId);
+                Semester activeSemester = fetchActiveSemester();
 
-                Semester activeSemester = semesterRepository.findByIsActiveTrue()
-                                .orElseThrow(() -> new ResourceNotFoundException("No active semester found"));
-
-                List<Enrollment> enrollments = enrollmentRepository.findByStudentAndSemester(student, activeSemester);
+                List<Enrollment> enrollments = enrollmentRepository
+                                .findByStudentIdAndCourseSection_SemesterId(studentId, activeSemester.getId());
 
                 return studentMapper.toScheduleDTO(student, enrollments, activeSemester);
         }
 
         @Override
-        @org.springframework.transaction.annotation.Transactional(readOnly = true)
-        public com.maplewood.dto.StudentCourseHistoryDTO getStudentCourseHistory(@NonNull Long studentId) {
-                Student student = studentRepository.findById(studentId)
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Student not found with id: " + studentId));
+        public StudentCourseHistoryDTO getStudentCourseHistory(Long studentId) {
+                Student student = fetchStudent(studentId);
+                Semester activeSemester = fetchActiveSemester();
 
-                List<CourseHistory> history = courseHistoryRepository.findByStudent(student);
+                List<CourseHistory> history = courseHistoryRepository.findByStudentId(studentId);
+                List<Enrollment> enrollments = enrollmentRepository
+                                .findByStudentIdAndCourseSection_SemesterId(studentId, activeSemester.getId());
 
-                List<Long> completedIds = history.stream()
-                                .filter(ch -> "passed".equalsIgnoreCase(ch.getStatus()))
-                                .map(ch -> ch.getCourse().getId())
-                                .collect(Collectors.toList());
-
-                // Get active enrollments
-                Semester activeSemester = semesterRepository.findByIsActiveTrue()
-                                .orElseThrow(() -> new ResourceNotFoundException("No active semester found"));
-
-                List<Enrollment> enrollments = enrollmentRepository.findByStudentAndSemester(student, activeSemester);
-
+                List<Long> completedIds = filterCourseIdsByStatus(history, CourseStatus.passed);
                 List<Long> activeIds = enrollments.stream()
                                 .map(e -> e.getCourseSection().getCourse().getId())
-                                .collect(Collectors.toList());
+                                .toList();
 
-                List<com.maplewood.dto.StudentEnrollmentDTO> allEnrollments = history.stream()
-                                .map(ch -> com.maplewood.dto.StudentEnrollmentDTO.builder()
-                                                .courseId(ch.getCourse().getId())
-                                                .courseName(ch.getCourse().getName())
-                                                .courseCode(ch.getCourse().getCode())
-                                                .semesterOrder(ch.getSemester().getOrderInYear())
-                                                .status(ch.getStatus())
-                                                .build())
-                                .collect(Collectors.toList());
+                // Merge history and active enrollments into DTOs
+                List<StudentEnrollmentDTO> allEnrollments = Stream.concat(
+                                history.stream().map(ch -> mapToEnrollmentDTO(ch, ch.getStatus().name().toLowerCase())),
+                                enrollments.stream().map(e -> mapToEnrollmentDTO(e, "active"))).toList();
 
-                // Add active enrollments to allEnrollments as 'active'
-                allEnrollments.addAll(enrollments.stream()
-                                .map(e -> com.maplewood.dto.StudentEnrollmentDTO.builder()
-                                                .courseId(e.getCourseSection().getCourse().getId())
-                                                .courseName(e.getCourseSection().getCourse().getName())
-                                                .courseCode(e.getCourseSection().getCourse().getCode())
-                                                .semesterOrder(e.getCourseSection().getSemester().getOrderInYear())
-                                                .status("active")
-                                                .build())
-                                .collect(Collectors.toList()));
-
-                return com.maplewood.dto.StudentCourseHistoryDTO.builder()
+                return StudentCourseHistoryDTO.builder()
                                 .completedCourseIds(completedIds)
                                 .activeCourseIds(activeIds)
                                 .allEnrollments(allEnrollments)
+                                .build();
+        }
+
+        // ---------------------- Private helpers ----------------------
+
+        private Student fetchStudent(Long studentId) {
+                return studentRepository.findById(studentId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Student not found with id: " + studentId));
+        }
+
+        private Semester fetchActiveSemester() {
+                return semesterRepository.findByIsActiveTrue()
+                                .orElseThrow(() -> new ResourceNotFoundException("No active semester found"));
+        }
+
+        private List<Long> filterCourseIdsByStatus(List<CourseHistory> history, CourseStatus status) {
+                return history.stream()
+                                .filter(ch -> status.equals(ch.getStatus()))
+                                .map(ch -> ch.getCourse().getId())
+                                .toList();
+        }
+
+        private StudentEnrollmentDTO mapToEnrollmentDTO(CourseHistory ch, String status) {
+                return StudentEnrollmentDTO.builder()
+                                .courseId(ch.getCourse().getId())
+                                .courseName(ch.getCourse().getName())
+                                .courseCode(ch.getCourse().getCode())
+                                .semesterOrder(ch.getSemester().getOrderInYear())
+                                .status(status)
+                                .build();
+        }
+
+        private StudentEnrollmentDTO mapToEnrollmentDTO(Enrollment e, String status) {
+                CourseSection cs = e.getCourseSection();
+                Course course = cs.getCourse();
+                Semester semester = cs.getSemester();
+
+                return StudentEnrollmentDTO.builder()
+                                .courseId(course.getId())
+                                .courseName(course.getName())
+                                .courseCode(course.getCode())
+                                .semesterOrder(semester.getOrderInYear())
+                                .status(status)
                                 .build();
         }
 }

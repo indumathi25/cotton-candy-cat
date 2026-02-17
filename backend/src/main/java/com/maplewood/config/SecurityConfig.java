@@ -1,5 +1,8 @@
 package com.maplewood.config;
 
+import com.maplewood.security.CustomAccessDeniedHandler;
+import com.maplewood.security.CustomAuthenticationEntryPoint;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -7,96 +10,124 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final com.maplewood.security.CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-    private final com.maplewood.security.CustomAccessDeniedHandler customAccessDeniedHandler;
+        private static final String FRONTEND_ORIGIN = "http://localhost:3000";
 
-    public SecurityConfig(com.maplewood.security.CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
-            com.maplewood.security.CustomAccessDeniedHandler customAccessDeniedHandler) {
-        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
-        this.customAccessDeniedHandler = customAccessDeniedHandler;
-    }
+        @Value("${STUDENT_USERNAME:student}")
+        private String studentUsername;
 
-    @Bean
-    public org.springframework.security.provisioning.InMemoryUserDetailsManager userDetailsService() {
-        org.springframework.security.core.userdetails.UserDetails student = org.springframework.security.core.userdetails.User
-                .withDefaultPasswordEncoder()
-                .username("student")
-                .password("password")
-                .roles("STUDENT")
-                .build();
-        org.springframework.security.core.userdetails.UserDetails admin = org.springframework.security.core.userdetails.User
-                .withDefaultPasswordEncoder()
-                .username("admin")
-                .password("admin")
-                .roles("ADMIN")
-                .build();
-        return new org.springframework.security.provisioning.InMemoryUserDetailsManager(student, admin);
-    }
+        @Value("${STUDENT_PASSWORD:password}")
+        private String studentPassword;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                // Disable CSRF using the new lambda DSL since we are using stateless REST APIs
-                .csrf(AbstractHttpConfigurer::disable)
+        @Value("${ADMIN_USERNAME:admin}")
+        private String adminUsername;
 
-                // Configure Exception Handling
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(customAuthenticationEntryPoint)
-                        .accessDeniedHandler(customAccessDeniedHandler))
+        @Value("${ADMIN_PASSWORD:admin}")
+        private String adminPassword;
 
-                // Configure CORS
-                .cors(Customizer.withDefaults())
+        private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+        private final CustomAccessDeniedHandler accessDeniedHandler;
 
-                // Stateless session management
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        public SecurityConfig(
+                        CustomAuthenticationEntryPoint authenticationEntryPoint,
+                        CustomAccessDeniedHandler accessDeniedHandler) {
+                this.authenticationEntryPoint = authenticationEntryPoint;
+                this.accessDeniedHandler = accessDeniedHandler;
+        }
 
-                // Authorize requests
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/enroll").hasRole("STUDENT")
-                        .requestMatchers("/api/schedule/**").hasAnyRole("STUDENT", "ADMIN")
-                        .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults()) // Enable Basic Auth for testing
+        // 🔐 Password encoder (industry standard)
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-                // Configure Security Headers
-                .headers(headers -> headers
-                        .xssProtection(xss -> xss.headerValue(
-                                org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
-                        .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
-                        .frameOptions(frame -> frame.deny())
-                        .referrerPolicy(referrer -> referrer
-                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
-                        .httpStrictTransportSecurity(hsts -> hsts
-                                .includeSubDomains(true)
-                                .maxAgeInSeconds(31536000)));
+        // 👤 In-memory users (OK for dev/testing)
+        @Bean
+        public InMemoryUserDetailsManager userDetailsService(PasswordEncoder encoder) {
 
-        return http.build();
-    }
+                UserDetails student = User.builder()
+                                .username(studentUsername)
+                                .password(encoder.encode(studentPassword))
+                                .roles("STUDENT")
+                                .build();
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        // Allow frontend origin - adjust if frontend runs on different port
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+                UserDetails admin = User.builder()
+                                .username(adminUsername)
+                                .password(encoder.encode(adminPassword))
+                                .roles("ADMIN")
+                                .build();
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+                return new InMemoryUserDetailsManager(student, admin);
+        }
+
+        // 🔒 Main security filter chain
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+                http
+                                .csrf(AbstractHttpConfigurer::disable)
+
+                                .cors(Customizer.withDefaults())
+
+                                .exceptionHandling(ex -> ex
+                                                .authenticationEntryPoint(authenticationEntryPoint)
+                                                .accessDeniedHandler(accessDeniedHandler))
+
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/api/enroll").hasRole("STUDENT")
+                                                .requestMatchers("/api/schedule/**").hasAnyRole("STUDENT", "ADMIN")
+                                                .anyRequest().authenticated())
+
+                                .httpBasic(Customizer.withDefaults())
+
+                                .headers(headers -> headers
+                                                .xssProtection(xss -> xss.headerValue(
+                                                                org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
+                                                .contentSecurityPolicy(
+                                                                csp -> csp.policyDirectives("default-src 'self'"))
+                                                .frameOptions(frame -> frame.deny())
+                                                .referrerPolicy(referrer -> referrer.policy(
+                                                                ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                                                .httpStrictTransportSecurity(hsts -> hsts
+                                                                .includeSubDomains(true)
+                                                                .maxAgeInSeconds(31536000)));
+
+                return http.build();
+        }
+
+        // 🌍 CORS configuration
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+
+                CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedOrigins(List.of(FRONTEND_ORIGIN));
+                config.setAllowedMethods(List.of(
+                                "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+                config.setAllowedHeaders(List.of(
+                                "Authorization", "Content-Type", "X-Requested-With"));
+                config.setAllowCredentials(true);
+                config.setMaxAge(3600L);
+
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", config);
+
+                return source;
+        }
 }

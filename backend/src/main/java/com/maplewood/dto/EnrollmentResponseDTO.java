@@ -16,4 +16,8 @@ public class EnrollmentResponseDTO {
     private String semesterName;
     private String status;
     private String message;
+
+    public boolean isSuccess() {
+        return "SUCCESS".equalsIgnoreCase(status);
+    }
 }

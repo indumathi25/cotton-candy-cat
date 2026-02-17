@@ -1,6 +1,7 @@
 package com.maplewood.util;
 
 import com.maplewood.model.CourseHistory;
+import com.maplewood.model.CourseStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -44,7 +45,7 @@ public class AcademicCalculator {
         String grade = record.getGrade();
 
         if (grade == null || grade.isBlank()) {
-            return "passed".equalsIgnoreCase(record.getStatus()) ? 4.0 : 0.0;
+            return CourseStatus.passed.equals(record.getStatus()) ? 4.0 : 0.0;
         }
 
         return switch (grade.toUpperCase()) {

@@ -30,8 +30,9 @@ public class CourseHistory {
 
     private String grade;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private CourseStatus status;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -2,36 +2,50 @@ package com.maplewood.repository;
 
 import com.maplewood.model.CourseSection;
 import com.maplewood.model.Enrollment;
-import com.maplewood.model.Semester;
-import com.maplewood.model.Student;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
-    @Query("SELECT e FROM Enrollment e " +
-            "JOIN FETCH e.courseSection cs " +
-            "JOIN FETCH cs.course c " +
-            "JOIN FETCH cs.teacher t " +
-            "JOIN FETCH cs.timeSlot ts " +
-            "WHERE e.student = :student AND cs.semester = :semester")
-    List<Enrollment> findByStudentAndSemester(Student student, Semester semester);
 
-    long countByCourseSection(CourseSection section);
+        @EntityGraph(attributePaths = {
+                        "courseSection",
+                        "courseSection.course",
+                        "courseSection.teacher",
+                        "courseSection.semester",
+                        "courseSection.timeSlot"
+        })
+        List<Enrollment> findByStudentIdAndCourseSection_SemesterId(
+                        Long studentId,
+                        Long semesterId);
 
-    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.student = :student AND e.courseSection.semester = :semester")
-    long countByStudentAndSemester(Student student, Semester semester);
+        long countByCourseSection(CourseSection section);
 
-    boolean existsByStudentAndCourseSection(Student student, CourseSection courseSection);
+        long countByStudentIdAndCourseSection_SemesterId(
+                        Long studentId,
+                        Long semesterId);
 
-    @Query("SELECT e FROM Enrollment e " +
-            "JOIN FETCH e.courseSection cs " +
-            "JOIN FETCH cs.course c " +
-            "JOIN FETCH cs.teacher t " +
-            "JOIN FETCH cs.semester s " +
-            "WHERE e.student.id = :studentId")
-    List<Enrollment> findByStudentId(Long studentId);
+        boolean existsByStudentIdAndCourseSectionId(
+                        Long studentId,
+                        Long courseSectionId);
+
+        @EntityGraph(attributePaths = {
+                        "courseSection",
+                        "courseSection.course",
+                        "courseSection.teacher",
+                        "courseSection.semester",
+                        "courseSection.timeSlot"
+        })
+        List<Enrollment> findByStudentId(Long studentId);
+
+        @Query("SELECT e.courseSection.id, COUNT(e) " +
+                        "FROM Enrollment e " +
+                        "WHERE e.courseSection.id IN :sectionIds " +
+                        "GROUP BY e.courseSection.id")
+        List<Object[]> countEnrollmentsBySectionIds(@Param("sectionIds") List<Long> sectionIds);
 }

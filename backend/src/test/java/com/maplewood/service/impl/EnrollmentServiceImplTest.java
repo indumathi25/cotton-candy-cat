@@ -5,6 +5,7 @@ import com.maplewood.dto.EnrollmentResponseDTO;
 import com.maplewood.exception.ResourceNotFoundException;
 import com.maplewood.mapper.EnrollmentMapper;
 import com.maplewood.model.*;
+import com.maplewood.model.CourseStatus;
 import com.maplewood.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,10 +98,12 @@ public class EnrollmentServiceImplTest {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
         when(courseSectionRepository.findById(1L)).thenReturn(Optional.of(section));
         when(semesterRepository.findByIsActiveTrue()).thenReturn(Optional.of(activeSemester));
-        when(enrollmentRepository.existsByStudentAndCourseSection(student, section)).thenReturn(false);
-        when(enrollmentRepository.countByStudentAndSemester(student, activeSemester)).thenReturn(0L);
+        when(enrollmentRepository.existsByStudentIdAndCourseSectionId(student.getId(), section.getId()))
+                .thenReturn(false);
+        when(enrollmentRepository.countByStudentIdAndCourseSection_SemesterId(student.getId(), activeSemester.getId()))
+                .thenReturn(0L);
         when(enrollmentRepository.countByCourseSection(section)).thenReturn(0L);
-        when(enrollmentRepository.findByStudentAndSemester(student, activeSemester))
+        when(enrollmentRepository.findByStudentIdAndCourseSection_SemesterId(student.getId(), activeSemester.getId()))
                 .thenReturn(Collections.emptyList());
 
         Enrollment savedEnrollment = new Enrollment();
@@ -129,7 +132,8 @@ public class EnrollmentServiceImplTest {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
         when(courseSectionRepository.findById(1L)).thenReturn(Optional.of(section));
         when(semesterRepository.findByIsActiveTrue()).thenReturn(Optional.of(activeSemester));
-        when(enrollmentRepository.existsByStudentAndCourseSection(student, section)).thenReturn(true);
+        when(enrollmentRepository.existsByStudentIdAndCourseSectionId(student.getId(), section.getId()))
+                .thenReturn(true);
 
         EnrollmentResponseDTO errorResponse = EnrollmentResponseDTO.builder()
                 .status("FAILED")
@@ -152,8 +156,10 @@ public class EnrollmentServiceImplTest {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
         when(courseSectionRepository.findById(1L)).thenReturn(Optional.of(section));
         when(semesterRepository.findByIsActiveTrue()).thenReturn(Optional.of(activeSemester));
-        when(enrollmentRepository.existsByStudentAndCourseSection(student, section)).thenReturn(false);
-        when(enrollmentRepository.countByStudentAndSemester(student, activeSemester)).thenReturn(5L);
+        when(enrollmentRepository.existsByStudentIdAndCourseSectionId(student.getId(), section.getId()))
+                .thenReturn(false);
+        when(enrollmentRepository.countByStudentIdAndCourseSection_SemesterId(student.getId(), activeSemester.getId()))
+                .thenReturn(5L);
 
         EnrollmentResponseDTO errorResponse = EnrollmentResponseDTO.builder()
                 .status("FAILED")
@@ -176,8 +182,10 @@ public class EnrollmentServiceImplTest {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
         when(courseSectionRepository.findById(1L)).thenReturn(Optional.of(section));
         when(semesterRepository.findByIsActiveTrue()).thenReturn(Optional.of(activeSemester));
-        when(enrollmentRepository.existsByStudentAndCourseSection(student, section)).thenReturn(false);
-        when(enrollmentRepository.countByStudentAndSemester(student, activeSemester)).thenReturn(0L);
+        when(enrollmentRepository.existsByStudentIdAndCourseSectionId(student.getId(), section.getId()))
+                .thenReturn(false);
+        when(enrollmentRepository.countByStudentIdAndCourseSection_SemesterId(student.getId(), activeSemester.getId()))
+                .thenReturn(0L);
 
         EnrollmentResponseDTO errorResponse = EnrollmentResponseDTO.builder()
                 .status("FAILED")
@@ -225,8 +233,10 @@ public class EnrollmentServiceImplTest {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
         when(courseSectionRepository.findById(1L)).thenReturn(Optional.of(section));
         when(semesterRepository.findByIsActiveTrue()).thenReturn(Optional.of(activeSemester));
-        when(enrollmentRepository.existsByStudentAndCourseSection(student, section)).thenReturn(false);
-        when(enrollmentRepository.countByStudentAndSemester(student, activeSemester)).thenReturn(0L);
+        when(enrollmentRepository.existsByStudentIdAndCourseSectionId(student.getId(), section.getId()))
+                .thenReturn(false);
+        when(enrollmentRepository.countByStudentIdAndCourseSection_SemesterId(student.getId(), activeSemester.getId()))
+                .thenReturn(0L);
         when(enrollmentRepository.countByCourseSection(section)).thenReturn(30L); // Max capacity is 30
 
         EnrollmentResponseDTO errorResponse = EnrollmentResponseDTO.builder()
@@ -250,10 +260,13 @@ public class EnrollmentServiceImplTest {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
         when(courseSectionRepository.findById(1L)).thenReturn(Optional.of(section));
         when(semesterRepository.findByIsActiveTrue()).thenReturn(Optional.of(activeSemester));
-        when(enrollmentRepository.existsByStudentAndCourseSection(student, section)).thenReturn(false);
-        when(enrollmentRepository.countByStudentAndSemester(student, activeSemester)).thenReturn(0L);
+        when(enrollmentRepository.existsByStudentIdAndCourseSectionId(student.getId(), section.getId()))
+                .thenReturn(false);
+        when(enrollmentRepository.countByStudentIdAndCourseSection_SemesterId(student.getId(), activeSemester.getId()))
+                .thenReturn(0L);
         when(enrollmentRepository.countByCourseSection(section)).thenReturn(0L);
-        when(courseHistoryRepository.existsByStudentAndCourseIdAndStatus(student, 5L, "passed")).thenReturn(false);
+        when(courseHistoryRepository.existsByStudentIdAndCourseIdAndStatus(student.getId(), 5L, CourseStatus.passed))
+                .thenReturn(false);
 
         EnrollmentResponseDTO errorResponse = EnrollmentResponseDTO.builder()
                 .status("FAILED")
@@ -275,8 +288,8 @@ public class EnrollmentServiceImplTest {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
         when(courseSectionRepository.findById(1L)).thenReturn(Optional.of(section));
         when(semesterRepository.findByIsActiveTrue()).thenReturn(Optional.of(activeSemester));
-        when(enrollmentRepository.existsByStudentAndCourseSection(student, section)).thenReturn(false);
-        when(enrollmentRepository.countByStudentAndSemester(student, activeSemester)).thenReturn(1L);
+        when(enrollmentRepository.existsByStudentIdAndCourseSectionId(student.getId(), section.getId()))
+                .thenReturn(false);
         when(enrollmentRepository.countByCourseSection(section)).thenReturn(0L);
 
         // Existing enrollment at the same time
@@ -287,20 +300,12 @@ public class EnrollmentServiceImplTest {
         existingSection.setTimeSlot(new TimeSlot(2L, "MONDAY", "08:30", "09:30")); // Overlaps with 08:00-09:00
         existingEnrollment.setCourseSection(existingSection);
 
-        when(enrollmentRepository.findByStudentAndSemester(student, activeSemester))
+        when(enrollmentRepository.findByStudentIdAndCourseSection_SemesterId(student.getId(), activeSemester.getId()))
                 .thenReturn(Collections.singletonList(existingEnrollment));
 
-        EnrollmentResponseDTO errorResponse = EnrollmentResponseDTO.builder()
-                .status("FAILED")
-                .message("Schedule conflict with History")
-                .build();
-        when(enrollmentMapper.toErrorResponse(any(), any(), anyString())).thenReturn(errorResponse);
-
-        // Act
-        EnrollmentResponseDTO response = enrollmentService.enrollStudent(request);
-
-        // Assert
-        assertEquals("FAILED", response.getStatus());
-        assertTrue(response.getMessage().contains("Schedule conflict"));
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> enrollmentService.enrollStudent(request));
+        assertTrue(exception.getMessage().contains("Schedule conflict with course History"));
     }
 }
