@@ -91,7 +91,7 @@ public class SecurityConfig {
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/enroll").hasRole("STUDENT")
+                                                .requestMatchers("/api/enrollments").hasRole("STUDENT")
                                                 .requestMatchers("/api/schedule/**").hasAnyRole("STUDENT", "ADMIN")
                                                 .anyRequest().authenticated())
 
