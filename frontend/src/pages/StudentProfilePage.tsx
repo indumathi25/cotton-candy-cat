@@ -4,25 +4,33 @@ import { StudentLayout } from '../components/layouts/StudentLayout';
 import { useAuth } from '../hooks/useAuth';
 import { fetchStudentProfile, selectStudentProfile } from '../store/studentSlice';
 import { AppDispatch } from '../store';
+import { useStudentHistory } from '../hooks/useStudentData';
 
 export const StudentProfilePage: React.FC = () => {
     const { user } = useAuth();
     const dispatch = useDispatch<AppDispatch>();
     const profile = useSelector(selectStudentProfile);
+    const studentId = user?.studentId || 0;
+
+    const { data: history, isLoading: historyLoading } = useStudentHistory(studentId);
 
     useEffect(() => {
-        if (user?.studentId) {
-            dispatch(fetchStudentProfile(user.studentId));
+        if (studentId) {
+            dispatch(fetchStudentProfile(studentId));
         }
-    }, [dispatch, user?.studentId]);
+    }, [dispatch, studentId]);
 
-    if (!profile) {
+    if (!profile || historyLoading) {
         return (
             <StudentLayout title="My Profile">
                 <div className="p-6">Loading profile...</div>
             </StudentLayout>
         );
     }
+
+    const completedEnrollments = history?.allEnrollments?.filter(
+        e => e.status === 'passed' || e.status === 'failed'
+    ) || [];
 
     return (
         <StudentLayout title="My Profile">
@@ -70,6 +78,49 @@ export const StudentProfilePage: React.FC = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Completed Courses Section */}
+            <div className="mt-8 bg-white shadow rounded-lg p-6">
+                <h2 className="text-xl font-semibold mb-4 border-b pb-2">Completed Courses (GPA Components)</h2>
+                {completedEnrollments.length > 0 ? (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Credits</th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                {completedEnrollments.map((course) => (
+                                    <tr key={course.courseId}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-medium text-gray-900">{course.courseName}</div>
+                                            <div className="text-xs text-gray-500">{course.courseCode}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${course.grade === 'F' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                                                }`}>
+                                                {course.grade || 'N/A'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                                            {course.credits}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 capitalize">
+                                            {course.status}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <p className="text-gray-500 italic">No completed courses found.</p>
+                )}
             </div>
         </StudentLayout>
     );

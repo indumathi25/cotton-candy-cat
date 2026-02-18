@@ -11,5 +11,6 @@ public class StudentEnrollmentDTO {
     private String courseCode;
     private Integer semesterOrder;
     private String grade;
+    private Integer credits;
     private String status; // 'active', 'completed', 'dropped'
 }

@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { getStudentProfile, getStudentSchedule, getCourses } from '../api/studentService';
-import { StudentProfile, StudentSchedule, Course, PageResponse } from '../types/api';
+import { getStudentProfile, getStudentSchedule, getCourses, getStudentHistory } from '../api/studentService';
+import { StudentProfile, StudentSchedule, Course, PageResponse, StudentCourseHistory } from '../types/api';
 
 export const useStudentProfile = (id: number): UseQueryResult<StudentProfile, Error> => {
     return useQuery({
@@ -26,6 +26,14 @@ export const useCourses = (
     return useQuery({
         queryKey: ['courses', grade, page, size],
         queryFn: () => getCourses(grade, page, size),
+        retry: 1,
+    });
+};
+
+export const useStudentHistory = (id: number): UseQueryResult<StudentCourseHistory, Error> => {
+    return useQuery({
+        queryKey: ['studentHistory', id],
+        queryFn: () => getStudentHistory(id),
         retry: 1,
     });
 };

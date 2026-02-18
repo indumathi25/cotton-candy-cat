@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { useStudentProfile, useStudentSchedule } from '../hooks/useStudentData';
+import { useStudentProfile, useStudentSchedule, useStudentHistory } from '../hooks/useStudentData';
 import { ProfileCard } from '../components/features/student/ProfileCard';
 import { ScheduleTable } from '../components/features/student/ScheduleTable';
 import { LoadingSkeleton, ErrorMessage } from '../components/common';
@@ -26,6 +26,11 @@ export const StudentDashboardContainer: React.FC = () => {
         refetch: refetchSchedule,
     } = useStudentSchedule(studentId);
 
+    const {
+        data: history,
+        isLoading: historyLoading,
+    } = useStudentHistory(studentId);
+
     return (
         <StudentLayout
             title="Student Dashboard"
@@ -35,7 +40,7 @@ export const StudentDashboardContainer: React.FC = () => {
                 <h3 id="profile-heading" className="sr-only">
                     Student Profile
                 </h3>
-                {profileLoading ? (
+                {profileLoading || historyLoading ? (
                     <LoadingSkeleton variant="card" />
                 ) : profileError ? (
                     <ErrorMessage
@@ -43,7 +48,7 @@ export const StudentDashboardContainer: React.FC = () => {
                         onRetry={refetchProfile}
                     />
                 ) : profile ? (
-                    <ProfileCard profile={profile} />
+                    <ProfileCard profile={profile} history={history} />
                 ) : null}
             </section>
 

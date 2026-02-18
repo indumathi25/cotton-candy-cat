@@ -107,6 +107,8 @@ public class StudentServiceImpl implements StudentService {
                                 .courseName(ch.getCourse().getName())
                                 .courseCode(ch.getCourse().getCode())
                                 .semesterOrder(ch.getSemester().getOrderInYear())
+                                .grade(ch.getGrade())
+                                .credits(ch.getCourse().getCredits())
                                 .status(status)
                                 .build();
         }
@@ -121,6 +123,7 @@ public class StudentServiceImpl implements StudentService {
                                 .courseName(course.getName())
                                 .courseCode(course.getCode())
                                 .semesterOrder(semester.getOrderInYear())
+                                .credits(course.getCredits())
                                 .status(status)
                                 .build();
         }

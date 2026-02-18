@@ -52,3 +52,19 @@ export interface ApiError {
     status: number;
     timestamp?: string;
 }
+
+export interface StudentEnrollmentDTO {
+    courseId: number;
+    courseName: string;
+    courseCode: string;
+    semesterOrder: number;
+    grade: string;
+    credits: number;
+    status: string; // 'active', 'completed', 'dropped'
+}
+
+export interface StudentCourseHistory {
+    completedCourseIds: number[];
+    activeCourseIds: number[];
+    allEnrollments: StudentEnrollmentDTO[];
+}
