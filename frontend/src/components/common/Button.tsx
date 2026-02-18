@@ -1,7 +1,9 @@
 import React, { ButtonHTMLAttributes } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
-type ButtonSize = 'sm' | 'md' | 'lg';
+import { BUTTON_VARIANTS, BUTTON_SIZES } from '../../constants/ui';
+
+type ButtonVariant = keyof typeof BUTTON_VARIANTS;
+type ButtonSize = keyof typeof BUTTON_SIZES;
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: ButtonVariant;
@@ -9,20 +11,6 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     isLoading?: boolean;
     fullWidth?: boolean;
 }
-
-const variantStyles: Record<ButtonVariant, string> = {
-    primary: 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-300',
-    secondary: 'bg-gray-100 hover:bg-gray-200 text-gray-700 focus:ring-gray-400',
-    danger: 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-300',
-    success: 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-300',
-    ghost: 'bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-gray-300',
-};
-
-const sizeStyles: Record<ButtonSize, string> = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
-};
 
 export const Button: React.FC<ButtonProps> = ({
     variant = 'primary',
@@ -40,7 +28,7 @@ export const Button: React.FC<ButtonProps> = ({
 
     return (
         <button
-            className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${disabledStyles} ${widthStyles} ${className}`}
+            className={`${baseStyles} ${BUTTON_VARIANTS[variant]} ${BUTTON_SIZES[size]} ${disabledStyles} ${widthStyles} ${className}`}
             disabled={disabled || isLoading}
             {...props}
         >

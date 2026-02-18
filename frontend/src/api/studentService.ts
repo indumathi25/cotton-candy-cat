@@ -1,5 +1,5 @@
 import apiClient from './client';
-import { StudentProfile, StudentSchedule, Course, PageResponse, StudentCourseHistory } from '../types/api';
+import { StudentProfile, StudentSchedule, StudentCourseHistory, GradeReport } from '../types/api';
 
 /**
  * Get student profile with GPA and academic progress
@@ -26,18 +26,9 @@ export const getStudentHistory = async (id: number): Promise<StudentCourseHistor
 };
 
 /**
- * Get available courses with optional filters
+ * Get student's grade report
  */
-export const getCourses = async (
-    grade?: number,
-    page: number = 0,
-    size: number = 20
-): Promise<PageResponse<Course>> => {
-    const params: Record<string, any> = { page, size };
-    if (grade) {
-        params.grade = grade;
-    }
-
-    const response = await apiClient.get<PageResponse<Course>>('/api/courses', { params });
+export const getGradeReport = async (studentId: number): Promise<GradeReport> => {
+    const response = await apiClient.get<GradeReport>(`/api/students/${studentId}/grades`);
     return response.data;
 };

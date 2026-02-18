@@ -1,27 +1,20 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
 import { StudentLayout } from '../components/layouts/StudentLayout';
 import { useAuth } from '../hooks/useAuth';
-import { fetchStudentSchedule, selectStudentSchedule } from '../store/studentSlice';
-import { AppDispatch } from '../store';
+import { useStudentSchedule } from '../hooks/useStudentData';
 import { ScheduleItem } from '../types/student';
-import { DAYS, TIME_SLOTS } from '../constants';
+import { DAYS, TIME_SLOTS } from '../constants/ui';
 
 export const StudentSchedulePage: React.FC = () => {
     const { user } = useAuth();
-    const dispatch = useDispatch<AppDispatch>();
-    const scheduleData = useSelector(selectStudentSchedule);
-
-    useEffect(() => {
-        if (user?.studentId) {
-            dispatch(fetchStudentSchedule(user.studentId));
-        }
-    }, [dispatch, user?.studentId]);
+    const studentId = user?.studentId || 101;
+    const { data: scheduleData, isPending, isError } = useStudentSchedule(studentId);
 
     const getScheduleItemsForSlot = (day: string, time: string): ScheduleItem[] => {
         if (!scheduleData?.schedule) return [];
 
         return scheduleData.schedule.filter(item => {
+            if (!item || !item.dayOfWeek) return false;
             if (item.dayOfWeek !== day) return false;
             // Check if this time slot falls within the course time
             const itemStart = item.startTime;
@@ -30,10 +23,18 @@ export const StudentSchedulePage: React.FC = () => {
         });
     };
 
-    if (!scheduleData) {
+    if (isPending) {
         return (
             <StudentLayout title="My Schedule">
                 <div className="p-6">Loading schedule...</div>
+            </StudentLayout>
+        );
+    }
+
+    if (isError || !scheduleData) {
+        return (
+            <StudentLayout title="My Schedule">
+                <div className="p-6 text-red-600">Failed to load schedule.</div>
             </StudentLayout>
         );
     }
@@ -106,7 +107,7 @@ export const StudentSchedulePage: React.FC = () => {
                 <div className="mt-8">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Enrolled Courses</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {scheduleData.schedule.map((item, idx) => (
+                        {scheduleData.schedule.filter(item => item && item.dayOfWeek).map((item, idx) => (
                             <div key={idx} className="border border-gray-200 rounded-lg p-4">
                                 <div className="font-semibold text-gray-900">{item.courseCode} - {item.courseName}</div>
                                 <div className="text-sm text-gray-600 mt-1">Instructor: {item.teacherName}</div>

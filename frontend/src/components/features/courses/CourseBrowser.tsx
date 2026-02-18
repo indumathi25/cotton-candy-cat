@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useCourses } from '../../../hooks/useCourses';
+import { useCourses } from '../../../hooks/useCourseData';
 import { CourseFilters } from './CourseFilters';
 import { CourseList } from './CourseList';
 import { selectUser } from '../../../store/authSlice';

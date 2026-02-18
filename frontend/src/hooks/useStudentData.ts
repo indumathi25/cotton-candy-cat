@@ -1,10 +1,10 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { getStudentProfile, getStudentSchedule, getCourses, getStudentHistory } from '../api/studentService';
-import { StudentProfile, StudentSchedule, Course, PageResponse, StudentCourseHistory } from '../types/api';
+import { getStudentProfile, getStudentSchedule, getStudentHistory, getGradeReport } from '../api/studentService';
+import { StudentProfile, StudentSchedule, StudentCourseHistory, GradeReport } from '../types/api';
 
 export const useStudentProfile = (id: number): UseQueryResult<StudentProfile, Error> => {
     return useQuery({
-        queryKey: ['studentProfile', id],
+        queryKey: ['student', 'profile', id],
         queryFn: () => getStudentProfile(id),
         retry: 1,
     });
@@ -12,28 +12,24 @@ export const useStudentProfile = (id: number): UseQueryResult<StudentProfile, Er
 
 export const useStudentSchedule = (id: number): UseQueryResult<StudentSchedule, Error> => {
     return useQuery({
-        queryKey: ['studentSchedule', id],
+        queryKey: ['student', 'schedule', id],
         queryFn: () => getStudentSchedule(id),
-        retry: 1,
-    });
-};
-
-export const useCourses = (
-    grade?: number,
-    page: number = 0,
-    size: number = 20
-): UseQueryResult<PageResponse<Course>, Error> => {
-    return useQuery({
-        queryKey: ['courses', grade, page, size],
-        queryFn: () => getCourses(grade, page, size),
         retry: 1,
     });
 };
 
 export const useStudentHistory = (id: number): UseQueryResult<StudentCourseHistory, Error> => {
     return useQuery({
-        queryKey: ['studentHistory', id],
+        queryKey: ['student', 'history', id],
         queryFn: () => getStudentHistory(id),
+        retry: 1,
+    });
+};
+
+export const useGradeReport = (id: number): UseQueryResult<GradeReport, Error> => {
+    return useQuery({
+        queryKey: ['student', 'grades', id],
+        queryFn: () => getGradeReport(id),
         retry: 1,
     });
 };

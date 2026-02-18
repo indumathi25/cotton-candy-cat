@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { setAuthCredentials } from './api/client';
 
-// Subscribe to Redux store changes to sync axios credentials
+// Subscribe to Redux store changes to sync API credentials
 store.subscribe(() => {
   const state = store.getState();
   if (state.auth.credentials) {

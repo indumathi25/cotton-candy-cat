@@ -1,4 +1,5 @@
 import React from 'react';
+import { PROGRESS_BAR_COLORS } from '../../constants/ui';
 
 interface ProgressBarProps {
     value: number;
@@ -6,15 +7,8 @@ interface ProgressBarProps {
     label?: string;
     showPercentage?: boolean;
     className?: string;
-    color?: 'blue' | 'green' | 'purple' | 'gradient';
+    color?: keyof typeof PROGRESS_BAR_COLORS;
 }
-
-const colorStyles: Record<string, string> = {
-    blue: 'bg-blue-600',
-    green: 'bg-green-600',
-    purple: 'bg-purple-600',
-    gradient: 'bg-gradient-to-r from-blue-500 to-purple-600',
-};
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({
     value,
@@ -43,7 +37,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
                 aria-label={label || `Progress: ${percentage.toFixed(1)}%`}
             >
                 <div
-                    className={`${colorStyles[color]} h-3 rounded-full transition-all duration-500`}
+                    className={`${PROGRESS_BAR_COLORS[color]} h-3 rounded-full transition-all duration-500`}
                     style={{ width: `${percentage}%` }}
                 ></div>
             </div>

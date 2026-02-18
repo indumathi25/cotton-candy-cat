@@ -4,14 +4,12 @@ import { useLoginForm } from '../hooks/useLoginForm';
 import { LoginForm } from '../components/features/auth/LoginForm';
 
 export const LoginContainer: React.FC = () => {
-    const { login } = useAuth();
+    const { login, isLoading, error } = useAuth();
     const {
         username,
         password,
         studentId,
         role,
-        error,
-        isLoading,
         setUsername,
         setPassword,
         setStudentId,
@@ -26,7 +24,7 @@ export const LoginContainer: React.FC = () => {
             password={password}
             studentId={studentId}
             role={role}
-            error={error}
+            error={error?.message || ''}
             isLoading={isLoading}
             onUsernameChange={setUsername}
             onPasswordChange={setPassword}
