@@ -6,7 +6,7 @@ import { selectUser } from '../store/authSlice';
 import { setSelectedGrade, selectSelectedGrade } from '../store/coursesSlice';
 import { Modal, LoadingSkeleton } from '../components/common';
 import { useStudentHistory, useStudentProfile } from '../hooks/useStudentData';
-import { useCourseSections, useEnrollment } from '../hooks/useCourseData';
+import { useEnrollment } from '../hooks/useCourseData';
 import { getCourseSections } from '../api/courseService';
 import { StudentCourseHistory } from '../types/api';
 
@@ -77,12 +77,13 @@ export const CoursesPage: React.FC = () => {
                 type: 'success'
             });
 
-        } catch (err: any) {
+        } catch (err) {
             console.error("Enrollment failed", err);
+            const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred during enrollment";
             setModalConfig({
                 isOpen: true,
                 title: 'Enrollment Failed',
-                message: err.message || "An unexpected error occurred during enrollment.",
+                message: errorMessage,
                 type: 'error'
             });
         }
@@ -101,6 +102,7 @@ export const CoursesPage: React.FC = () => {
             <CourseBrowser
                 selectedGrade={selectedGrade}
                 onGradeChange={(grade) => dispatch(setSelectedGrade(grade))}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 courseHistory={studentCourseHistory as any}
                 onEnroll={handleEnroll}
                 studentGradeLevel={profile?.gradeLevel || 9}
