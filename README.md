@@ -38,10 +38,22 @@ python3 populate_database.py
 
 > **Note**: The script creates `maplewood_school.sqlite` in the project root. Docker Compose automatically mounts it from there.
 
-### 2. Run with Docker (Recommended)
+### 2. Configure Environment Variables
+
+Copy the example environment file and customize it if needed:
 
 ```bash
-docker compose up --build
+cp .env.example .env
+```
+
+The default values are pre-configured for local Docker development.
+
+### 3. Run with Docker (Recommended)
+
+```bash
+# Build and start the containers
+make build
+make up
 ```
 
 - Frontend: `http://localhost:3000`

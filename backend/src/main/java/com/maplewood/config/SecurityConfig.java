@@ -27,16 +27,16 @@ public class SecurityConfig {
 
         private static final String FRONTEND_ORIGIN = "http://localhost:3000";
 
-        @Value("${STUDENT_USERNAME:student}")
+        @Value("${security.student.username:student}")
         private String studentUsername;
 
-        @Value("${STUDENT_PASSWORD:password}")
+        @Value("${security.student.password:password}")
         private String studentPassword;
 
-        @Value("${ADMIN_USERNAME:admin}")
+        @Value("${security.admin.username:admin}")
         private String adminUsername;
 
-        @Value("${ADMIN_PASSWORD:admin}")
+        @Value("${security.admin.password:admin}")
         private String adminPassword;
 
         private final CustomAuthenticationEntryPoint authenticationEntryPoint;
