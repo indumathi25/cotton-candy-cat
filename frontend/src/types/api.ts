@@ -68,3 +68,24 @@ export interface StudentCourseHistory {
     activeCourseIds: number[];
     allEnrollments: StudentEnrollmentDTO[];
 }
+
+export interface CourseGrade {
+    enrollmentId: number;
+    courseCode: string;
+    courseName: string;
+    teacherName: string;
+    semester: string;
+    grade: string | null;
+    credits: number;
+    status: string;
+}
+
+export interface GradeReport {
+    studentId: number;
+    studentName: string;
+    gradeLevel: number;
+    overallGpa: number;
+    totalCreditsEarned: number;
+    totalCreditsAttempted: number;
+    courseGrades: CourseGrade[];
+}

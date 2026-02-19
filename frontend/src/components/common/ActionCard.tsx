@@ -1,46 +1,15 @@
 import React from 'react';
 
+import { ACTION_CARD_COLORS, UIColor } from '../../constants/ui';
+
 interface ActionCardProps {
     title: string;
     description: string;
     icon: React.ReactNode;
-    color: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'indigo';
+    color: UIColor;
     onClick?: () => void;
     ariaLabel?: string;
 }
-
-const colorClasses = {
-    blue: {
-        text: 'text-blue-600',
-        border: 'hover:border-blue-500',
-        focus: 'focus:ring-blue-300',
-    },
-    green: {
-        text: 'text-green-600',
-        border: 'hover:border-green-500',
-        focus: 'focus:ring-green-300',
-    },
-    purple: {
-        text: 'text-purple-600',
-        border: 'hover:border-purple-500',
-        focus: 'focus:ring-purple-300',
-    },
-    orange: {
-        text: 'text-orange-600',
-        border: 'hover:border-orange-500',
-        focus: 'focus:ring-orange-300',
-    },
-    red: {
-        text: 'text-red-600',
-        border: 'hover:border-red-500',
-        focus: 'focus:ring-red-300',
-    },
-    indigo: {
-        text: 'text-indigo-600',
-        border: 'hover:border-indigo-500',
-        focus: 'focus:ring-indigo-300',
-    },
-};
 
 export const ActionCard: React.FC<ActionCardProps> = ({
     title,
@@ -50,7 +19,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({
     onClick,
     ariaLabel,
 }) => {
-    const colors = colorClasses[color];
+    const colors = ACTION_CARD_COLORS[color];
 
     return (
         <button

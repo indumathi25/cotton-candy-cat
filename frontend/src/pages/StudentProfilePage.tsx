@@ -1,26 +1,16 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
 import { StudentLayout } from '../components/layouts/StudentLayout';
 import { useAuth } from '../hooks/useAuth';
-import { fetchStudentProfile, selectStudentProfile } from '../store/studentSlice';
-import { AppDispatch } from '../store';
-import { useStudentHistory } from '../hooks/useStudentData';
+import { useStudentHistory, useStudentProfile } from '../hooks/useStudentData';
 
 export const StudentProfilePage: React.FC = () => {
     const { user } = useAuth();
-    const dispatch = useDispatch<AppDispatch>();
-    const profile = useSelector(selectStudentProfile);
-    const studentId = user?.studentId || 0;
+    const studentId = user?.studentId || 101;
 
+    const { data: profile, isLoading: profileLoading } = useStudentProfile(studentId);
     const { data: history, isLoading: historyLoading } = useStudentHistory(studentId);
 
-    useEffect(() => {
-        if (studentId) {
-            dispatch(fetchStudentProfile(studentId));
-        }
-    }, [dispatch, studentId]);
-
-    if (!profile || historyLoading) {
+    if (profileLoading || historyLoading || !profile) {
         return (
             <StudentLayout title="My Profile">
                 <div className="p-6">Loading profile...</div>

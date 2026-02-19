@@ -9,9 +9,19 @@ RUN npm install
 # Copy source files
 COPY . .
 
-# Build argument for API URL (defaults to localhost)
-ARG REACT_APP_API_URL=http://localhost:8080
-ENV REACT_APP_API_URL=$REACT_APP_API_URL
+# Build arguments for Vite env vars (passed during build time)
+ARG VITE_API_URL
+ARG VITE_STUDENT_USERNAME
+ARG VITE_STUDENT_PASSWORD
+ARG VITE_ADMIN_USERNAME
+ARG VITE_ADMIN_PASSWORD
+
+# Set them as ENV so the 'npm run build' process can see them
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_STUDENT_USERNAME=$VITE_STUDENT_USERNAME
+ENV VITE_STUDENT_PASSWORD=$VITE_STUDENT_PASSWORD
+ENV VITE_ADMIN_USERNAME=$VITE_ADMIN_USERNAME
+ENV VITE_ADMIN_PASSWORD=$VITE_ADMIN_PASSWORD
 
 # Build the app
 RUN npm run build

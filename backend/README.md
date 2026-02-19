@@ -32,14 +32,15 @@ python3 populate_database.py
 cp maplewood_school.sqlite backend/
 ```
 
-This creates:
-- **400 students** (100 per grade: 9, 10, 11, 12)
-- **6,455 course history records**
-- **57 courses** (20 core + 37 electives)
-- **50 teachers**
-- **60 classrooms**
+### 2. Configure Environment Variables
 
-### 2. Run the Application
+The backend uses environment variables for database URLs and security credentials. Copy the example from the project root:
+
+```bash
+cp ../.env.example ../.env
+```
+
+### 3. Run the Application
 
 ```bash
 cd backend
@@ -193,7 +194,7 @@ curl -u admin:admin "http://localhost:8080/api/courses?page=1&size=10&sort=name,
 
 Enrolls a student in a course section with comprehensive validation.
 
-**Endpoint:** `POST /api/enroll`
+**Endpoint:** `POST /api/enrollments`
 
 **Authorization:** STUDENT role
 
@@ -223,34 +224,28 @@ curl -u student:password \
     "studentId": 1,
     "courseSectionId": 1
   }' \
-  http://localhost:8080/api/enroll | jq
+  http://localhost:8080/api/enrollments | jq
 ```
 
 **Success Response (200 OK):**
 ```json
 {
-  "status": "SUCCESS",
-  "message": "Enrollment successful",
-  "studentId": 1,
+  "enrollmentId": 1001,
   "studentName": "James Diaz",
-  "courseCode": "ENG101",
   "courseName": "English I: Foundations",
-  "section": "Section A",
-  "semesterName": "Fall 2024"
+  "semesterName": "Fall 2024",
+  "status": "SUCCESS",
+  "message": "Successfully enrolled"
 }
 ```
 
 **Validation Error Response (400 Bad Request):**
 ```json
 {
-  "status": "FAILED",
-  "message": "Maximum course limit (5) reached for this semester",
-  "studentId": 1,
   "studentName": "James Diaz",
-  "courseCode": "ENG101",
   "courseName": "English I: Foundations",
-  "section": null,
-  "semesterName": null
+  "status": "FAILED",
+  "message": "Maximum course limit (5) reached for this semester"
 }
 ```
 
@@ -303,7 +298,7 @@ curl -u student:password \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{"studentId": 1, "courseSectionId": 1}' \
-  http://localhost:8080/api/enroll | jq
+  http://localhost:8080/api/enrollments | jq
 ```
 
 ---

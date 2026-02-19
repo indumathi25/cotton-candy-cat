@@ -1,22 +1,18 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import { StudentLayout } from '../components/layouts/StudentLayout';
 import { selectUser } from '../store/authSlice';
-import { fetchGradeReport, selectGradeReport } from '../store/studentSlice';
-import { AppDispatch } from '../store';
+import { useGradeReport } from '../hooks/useStudentData';
+import { GRADE_COLORS, ACADEMIC_STANDING } from '../constants/ui';
+import { CourseGrade } from '../types/api';
 
 export const StudentGradesPage: React.FC = () => {
-    const dispatch = useDispatch<AppDispatch>();
     const user = useSelector(selectUser);
-    const gradeReport = useSelector(selectGradeReport);
+    const studentId = user?.studentId || 101;
 
-    useEffect(() => {
-        if (user?.studentId) {
-            dispatch(fetchGradeReport(user.studentId));
-        }
-    }, [dispatch, user?.studentId]);
+    const { data: gradeReport, isPending, isError } = useGradeReport(studentId);
 
-    if (!gradeReport) {
+    if (isPending) {
         return (
             <StudentLayout title="My Grades">
                 <div className="bg-white shadow rounded-lg p-6">
@@ -26,26 +22,22 @@ export const StudentGradesPage: React.FC = () => {
         );
     }
 
+    if (isError || !gradeReport) {
+        return (
+            <StudentLayout title="My Grades">
+                <div className="bg-white shadow rounded-lg p-6">
+                    <p className="text-red-600">Failed to load grade report.</p>
+                </div>
+            </StudentLayout>
+        );
+    }
+
     const getGradeColor = (grade: string | null) => {
         if (!grade) return 'text-gray-500';
-        switch (grade.toUpperCase()) {
-            case 'A': return 'text-green-600 font-semibold';
-            case 'B': return 'text-blue-600 font-semibold';
-            case 'C': return 'text-yellow-600 font-semibold';
-            case 'D': return 'text-orange-600 font-semibold';
-            case 'F': return 'text-red-600 font-semibold';
-            default: return 'text-gray-500';
-        }
+        return GRADE_COLORS[grade.toUpperCase()] || 'text-gray-500';
     };
 
-    const getAcademicStanding = (gpa: number) => {
-        if (gpa >= 3.5) return { text: 'Excellent', color: 'text-green-600' };
-        if (gpa >= 3.0) return { text: 'Good', color: 'text-blue-600' };
-        if (gpa >= 2.0) return { text: 'Satisfactory', color: 'text-yellow-600' };
-        return { text: 'Needs Improvement', color: 'text-red-600' };
-    };
-
-    const standing = getAcademicStanding(gradeReport.overallGpa);
+    const standing = ACADEMIC_STANDING.find(s => (gradeReport?.overallGpa || 0) >= s.minGpa) || ACADEMIC_STANDING[ACADEMIC_STANDING.length - 1];
 
     return (
         <StudentLayout title="My Grades">
@@ -77,7 +69,7 @@ export const StudentGradesPage: React.FC = () => {
                     <p className="text-gray-600">No grades available yet.</p>
                 ) : (
                     <div className="space-y-4">
-                        {gradeReport.courseGrades.map((courseGrade) => (
+                        {gradeReport.courseGrades.map((courseGrade: CourseGrade) => (
                             <div
                                 key={courseGrade.enrollmentId}
                                 className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
@@ -95,8 +87,8 @@ export const StudentGradesPage: React.FC = () => {
                                                 Credits: {courseGrade.credits}
                                             </span>
                                             <span className={`text-sm px-2 py-1 rounded ${courseGrade.status === 'completed'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-blue-100 text-blue-800'
+                                                ? 'bg-green-100 text-green-800'
+                                                : 'bg-blue-100 text-blue-800'
                                                 }`}>
                                                 {courseGrade.status === 'completed' ? 'Completed' : 'In Progress'}
                                             </span>

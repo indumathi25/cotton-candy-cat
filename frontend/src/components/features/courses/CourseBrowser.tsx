@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useCourses } from '../../../hooks/useCourses';
+import { useCourses } from '../../../hooks/useCourseData';
 import { CourseFilters } from './CourseFilters';
 import { CourseList } from './CourseList';
 import { selectUser } from '../../../store/authSlice';
@@ -12,6 +12,7 @@ interface CourseBrowserProps {
     onGradeChange: (grade: number | null) => void;
     courseHistory: StudentCourseHistory;
     onEnroll: (courseId: number) => void;
+    studentGradeLevel: number;
 }
 
 export const CourseBrowser: React.FC<CourseBrowserProps> = ({
@@ -19,9 +20,9 @@ export const CourseBrowser: React.FC<CourseBrowserProps> = ({
     onGradeChange,
     courseHistory,
     onEnroll,
+    studentGradeLevel,
 }) => {
     const user = useSelector(selectUser);
-    const studentGradeLevel = user?.studentId ? 10 : 0; // TODO: Get from actual student profile
 
     const {
         data: coursesResponse,

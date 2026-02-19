@@ -1,11 +1,13 @@
 import React from 'react';
 
+import { MODAL_VARIANTS } from '../../constants/ui';
+
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     title: string;
     children: React.ReactNode;
-    variant?: 'success' | 'error' | 'info';
+    variant?: keyof typeof MODAL_VARIANTS;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -17,12 +19,6 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
     if (!isOpen) return null;
 
-    const variantStyles = {
-        success: 'border-t-4 border-green-500',
-        error: 'border-t-4 border-red-500',
-        info: 'border-t-4 border-blue-500',
-    };
-
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
@@ -32,7 +28,7 @@ export const Modal: React.FC<ModalProps> = ({
             aria-labelledby="modal-title"
         >
             <div
-                className={`bg-white rounded-lg p-6 max-w-md w-full mx-4 relative shadow-xl ${variantStyles[variant]}`}
+                className={`bg-white rounded-lg p-6 max-w-md w-full mx-4 relative shadow-xl ${MODAL_VARIANTS[variant]}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 <button

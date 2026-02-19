@@ -15,10 +15,7 @@ export const login = async (
         let studentId: number | undefined;
 
         if (role === 'STUDENT') {
-            // Test with student ID 101 (has course history)
-            // In production, backend would return the student ID on login
             studentId = studentIdOverride || 101;
-
             await apiClient.get(`/api/students/${studentId}`);
         } else {
             // For admin, just verify credentials with a simple call

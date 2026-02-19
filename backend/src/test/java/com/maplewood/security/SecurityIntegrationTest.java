@@ -41,7 +41,7 @@ public class SecurityIntegrationTest {
     @Test
     void testEnrollEndpoint_Unauthenticated_Returns401() throws Exception {
         EnrollmentRequestDTO request = new EnrollmentRequestDTO(1L, 1L);
-        mockMvc.perform(post("/api/enroll")
+        mockMvc.perform(post("/api/enrollments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -59,7 +59,7 @@ public class SecurityIntegrationTest {
 
         when(enrollmentService.enrollStudent(any(EnrollmentRequestDTO.class))).thenReturn(response);
 
-        mockMvc.perform(post("/api/enroll")
+        mockMvc.perform(post("/api/enrollments")
                 .with(csrf()) // Just in case, though it's disabled
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -70,7 +70,7 @@ public class SecurityIntegrationTest {
     @WithMockUser(username = "admin", roles = { "ADMIN" })
     void testEnrollEndpoint_AuthenticatedAdmin_UsingAPI_Returns403() throws Exception {
         EnrollmentRequestDTO request = new EnrollmentRequestDTO(1L, 1L);
-        mockMvc.perform(post("/api/enroll")
+        mockMvc.perform(post("/api/enrollments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden())
@@ -83,7 +83,7 @@ public class SecurityIntegrationTest {
     @WithMockUser(username = "student", roles = { "STUDENT" })
     void testEnrollEndpoint_InvalidInput_Returns400() throws Exception {
         EnrollmentRequestDTO request = new EnrollmentRequestDTO(-1L, 1L); // Invalid Student ID
-        mockMvc.perform(post("/api/enroll")
+        mockMvc.perform(post("/api/enrollments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());

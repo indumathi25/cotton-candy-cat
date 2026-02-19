@@ -1,11 +1,13 @@
 import React from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { useAdminStats } from '../hooks/useAdminData';
 import { StatCard } from '../components/features/admin/StatCard';
-import { Button, Card } from '../components/common';
+import { Button, Card, LoadingSkeleton, ErrorMessage } from '../components/common';
 import { DashboardLayout } from '../components/layouts/DashboardLayout';
 
 export const AdminDashboardContainer: React.FC = () => {
     const { user } = useAuth();
+    const { data: stats, isLoading, isError, refetch } = useAdminStats();
 
     return (
         <DashboardLayout
@@ -18,32 +20,40 @@ export const AdminDashboardContainer: React.FC = () => {
                 <h3 id="stats-heading" className="sr-only">
                     System Statistics
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <StatCard
-                        label="Total Students"
-                        value="400"
-                        icon="👨‍🎓"
-                        color="blue"
-                    />
-                    <StatCard
-                        label="Active Courses"
-                        value="57"
-                        icon="📚"
-                        color="green"
-                    />
-                    <StatCard
-                        label="Faculty Members"
-                        value="50"
-                        icon="👩‍🏫"
-                        color="purple"
-                    />
-                    <StatCard
-                        label="Classrooms"
-                        value="60"
-                        icon="🏫"
-                        color="orange"
-                    />
-                </div>
+                {isLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {[1, 2, 3, 4].map(i => <LoadingSkeleton key={i} variant="card" />)}
+                    </div>
+                ) : isError ? (
+                    <ErrorMessage message="Failed to load statistics" onRetry={refetch} />
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <StatCard
+                            label="Total Students"
+                            value={stats?.totalStudents.toString() || '0'}
+                            icon="👨‍🎓"
+                            color="blue"
+                        />
+                        <StatCard
+                            label="Active Courses"
+                            value={stats?.activeCourses.toString() || '0'}
+                            icon="📚"
+                            color="green"
+                        />
+                        <StatCard
+                            label="Faculty Members"
+                            value={stats?.totalTeachers.toString() || '0'}
+                            icon="👩‍🏫"
+                            color="purple"
+                        />
+                        <StatCard
+                            label="Classrooms"
+                            value={stats?.totalClassrooms.toString() || '0'}
+                            icon="🏫"
+                            color="orange"
+                        />
+                    </div>
+                )}
             </section>
 
             {/* Quick Actions */}

@@ -1,39 +1,14 @@
 import React from 'react';
 
+import { STAT_CARD_COLORS, UIColor } from '../../constants/ui';
+
 interface StatCardProps {
     title: string;
     value: string | number;
     subtitle?: string;
     icon: React.ReactNode;
-    color: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'indigo';
+    color: UIColor;
 }
-
-const colorClasses = {
-    blue: {
-        text: 'text-blue-600',
-        bg: 'bg-blue-100',
-    },
-    green: {
-        text: 'text-green-600',
-        bg: 'bg-green-100',
-    },
-    purple: {
-        text: 'text-purple-600',
-        bg: 'bg-purple-100',
-    },
-    orange: {
-        text: 'text-orange-600',
-        bg: 'bg-orange-100',
-    },
-    red: {
-        text: 'text-red-600',
-        bg: 'bg-red-100',
-    },
-    indigo: {
-        text: 'text-indigo-600',
-        bg: 'bg-indigo-100',
-    },
-};
 
 export const StatCard: React.FC<StatCardProps> = ({
     title,
@@ -42,7 +17,7 @@ export const StatCard: React.FC<StatCardProps> = ({
     icon,
     color,
 }) => {
-    const colors = colorClasses[color];
+    const colors = STAT_CARD_COLORS[color];
 
     return (
         <div className="bg-white rounded-xl shadow-md p-6">
