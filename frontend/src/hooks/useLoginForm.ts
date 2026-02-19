@@ -22,13 +22,13 @@ export const useLoginForm = (): UseLoginFormReturn => {
 
     const fillDemoCredentials = (demoRole: UserRole): void => {
         if (demoRole === 'STUDENT') {
-            setUsername(process.env.REACT_APP_STUDENT_USERNAME || 'student');
-            setPassword(process.env.REACT_APP_STUDENT_PASSWORD || 'password');
+            setUsername(import.meta.env.VITE_STUDENT_USERNAME || 'student');
+            setPassword(import.meta.env.VITE_STUDENT_PASSWORD || 'password');
             setStudentId('101');
             setRole('STUDENT');
         } else {
-            setUsername(process.env.REACT_APP_ADMIN_USERNAME || 'admin');
-            setPassword(process.env.REACT_APP_ADMIN_PASSWORD || 'admin');
+            setUsername(import.meta.env.VITE_ADMIN_USERNAME || 'admin');
+            setPassword(import.meta.env.VITE_ADMIN_PASSWORD || 'admin');
             setStudentId('');
             setRole('ADMIN');
         }

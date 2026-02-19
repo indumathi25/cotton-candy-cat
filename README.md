@@ -15,14 +15,14 @@ This system provides course enrollment management and academic tracking for high
 - Maven
 
 **Frontend**
-- React 18 with TypeScript
+- React 19 with TypeScript
 - Tailwind CSS
-- npm/Vite
+- npm/Vite (Modern build pipeline)
 
 ## Prerequisites
 
 - Java 17+
-- Node.js 16+
+- Node.js 20+ (Required for Vite 7)
 - Maven 3.8+
 - Python 3 (for database setup)
 - Docker & Docker Compose (optional)
@@ -58,6 +58,9 @@ make up
 
 - Frontend: `http://localhost:3000`
 - Backend API: `http://localhost:8080`
+
+### 📘 Architecture & Modernization
+Check out [**ARCHITECTURE_DECISIONS.md**](./ARCHITECTURE_DECISIONS.md) to learn about the Vite migration, React Compiler integration, and our security/configuration standards.
 
 ### Alternative: Run Locally
 
@@ -111,10 +114,12 @@ cotton-candy-cat/
 
 ## Best Practices
 
+- **Advanced DSA**: Prerequisite logic modeled as a Directed Acyclic Graph (DAG) with Topological Sorting
+- **React Compiler**: Automatic memoization (no manual useMemo/useCallback) via React 19 Compiler
 - **Transaction Management**: All write operations use `@Transactional` for data consistency
 - **Input Validation**: Request DTOs validated with Jakarta Validation
 - **Error Handling**: Centralized exception handling with meaningful error messages
-- **Security**: Role-based access control on all endpoints
+- **Security**: Role-based access control and hardened security headers
 - **Code Organization**: Clean architecture with separated layers (Controller → Service → Repository)
 - **Testing**: Run `./mvnw test` (backend) and `npm test` (frontend) before deployment
 

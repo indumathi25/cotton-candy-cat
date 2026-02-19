@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { CourseBrowser } from '../components/features/courses/CourseBrowser';
 import { StudentLayout } from '../components/layouts/StudentLayout';
 import { selectUser } from '../store/authSlice';
-import { Modal } from '../components/common';
-import { useStudentHistory } from '../hooks/useStudentData';
+import { setSelectedGrade, selectSelectedGrade } from '../store/coursesSlice';
+import { Modal, LoadingSkeleton } from '../components/common';
+import { useStudentHistory, useStudentProfile } from '../hooks/useStudentData';
 import { useCourseSections, useEnrollment } from '../hooks/useCourseData';
 import { getCourseSections } from '../api/courseService';
 import { StudentCourseHistory } from '../types/api';
 
 export const CoursesPage: React.FC = () => {
+    const dispatch = useDispatch();
     const user = useSelector(selectUser);
+    const selectedGrade = useSelector(selectSelectedGrade);
     const studentId = user?.studentId || 101;
 
+    const { data: profile, isLoading: profileLoading } = useStudentProfile(studentId);
     const { data: history } = useStudentHistory(studentId);
     const { mutateAsync: enrollInSection } = useEnrollment();
-    const { refetch: fetchSections } = useCourseSections(0); // This is generic
-
-    const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
 
     // Modal State
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; title: string; message: string; type: 'success' | 'error' }>({
@@ -87,13 +88,22 @@ export const CoursesPage: React.FC = () => {
         }
     };
 
+    if (profileLoading) {
+        return (
+            <StudentLayout title="Browse Courses">
+                <LoadingSkeleton lines={5} />
+            </StudentLayout>
+        );
+    }
+
     return (
         <StudentLayout title="Browse Courses">
             <CourseBrowser
                 selectedGrade={selectedGrade}
-                onGradeChange={setSelectedGrade}
+                onGradeChange={(grade) => dispatch(setSelectedGrade(grade))}
                 courseHistory={studentCourseHistory as any}
                 onEnroll={handleEnroll}
+                studentGradeLevel={profile?.gradeLevel || 9}
             />
 
             <Modal

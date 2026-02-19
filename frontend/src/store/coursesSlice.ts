@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from './index';
 
 interface CoursesState {
     selectedGrade: number | null;
@@ -19,5 +20,8 @@ export const coursesSlice = createSlice({
 });
 
 export const { setSelectedGrade } = coursesSlice.actions;
+
+// Selectors
+export const selectSelectedGrade = (state: RootState) => state.courses.selectedGrade;
 
 export default coursesSlice.reducer;
