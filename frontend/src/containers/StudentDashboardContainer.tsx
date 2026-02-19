@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useStudentProfile, useStudentSchedule, useStudentHistory } from '../hooks/useStudentData';
 import { ProfileCard } from '../components/features/student/ProfileCard';
@@ -9,7 +8,6 @@ import { StudentLayout } from '../components/layouts/StudentLayout';
 
 export const StudentDashboardContainer: React.FC = () => {
     const { user } = useAuth();
-    const navigate = useNavigate();
     const studentId = user?.studentId || 101;
 
     const {

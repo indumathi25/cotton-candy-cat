@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { useCourses } from '../../../hooks/useCourseData';
 import { CourseFilters } from './CourseFilters';
@@ -22,7 +22,6 @@ export const CourseBrowser: React.FC<CourseBrowserProps> = ({
     onEnroll,
     studentGradeLevel,
 }) => {
-    const user = useSelector(selectUser);
 
     const {
         data: coursesResponse,

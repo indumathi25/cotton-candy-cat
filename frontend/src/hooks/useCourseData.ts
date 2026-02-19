@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { getCourses, getCourseSections, enrollInCourse, getCourseById } from '../api/courseService';
 import { Course } from '../types/course';
-import { CourseSection } from '../types/student';
 import { PageResponse } from '../types/api';
 
 export const useCourses = (grade?: number, page: number = 0, size: number = 20): UseQueryResult<PageResponse<Course>, Error> => {
