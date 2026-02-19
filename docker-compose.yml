@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   backend:
+    image: ghcr.io/indumathi25/cotton-candy-cat/backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -29,18 +30,19 @@ services:
     restart: unless-stopped
 
   frontend:
+    image: ghcr.io/indumathi25/cotton-candy-cat/frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=${VITE_API_URL:-http://localhost:8080}
+        - VITE_API_URL=${VITE_API_URL:-}
         - VITE_STUDENT_USERNAME=${VITE_STUDENT_USERNAME:-student}
         - VITE_STUDENT_PASSWORD=${VITE_STUDENT_PASSWORD:-password}
         - VITE_ADMIN_USERNAME=${VITE_ADMIN_USERNAME:-admin}
         - VITE_ADMIN_PASSWORD=${VITE_ADMIN_PASSWORD:-admin}
     container_name: maplewood-frontend
     ports:
-      - "3000:80"
+      - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       backend:
         condition: service_healthy
