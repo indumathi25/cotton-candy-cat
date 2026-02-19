@@ -1,4 +1,5 @@
-import { defineConfig } from 'vite';
+/// <reference types="vitest" />
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
@@ -14,12 +15,24 @@ export default defineConfig({
     ],
     envDir: '../',
     server: {
-        port: 3000,      // Keep same port as CRA default
-        open: true,      // Auto-open browser on start
+        port: 3000,
+        open: true,
+        proxy: {
+            '/api': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+            },
+        },
     },
     build: {
         outDir: 'build', // Keep same output dir as CRA (for Dockerfile compatibility)
         sourcemap: true,
+    },
+    test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: './src/setupTests.ts',
+        css: true,
     },
     resolve: {
         alias: {

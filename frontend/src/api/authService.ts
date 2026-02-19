@@ -27,7 +27,7 @@ export const login = async (
             role,
             studentId,
         };
-    } catch (error) {
+    } catch {
         clearAuthCredentials();
         throw new Error('Invalid credentials');
     }

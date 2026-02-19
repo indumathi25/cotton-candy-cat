@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { CourseCard } from './CourseCard';
 import { CourseWithEnrollmentStatus } from '../../../types/course';
 
@@ -19,7 +20,7 @@ describe('CourseCard', () => {
         enrollmentBlockReason: null
     };
 
-    const mockOnEnroll = jest.fn();
+    const mockOnEnroll = vi.fn();
 
     beforeEach(() => {
         mockOnEnroll.mockClear();

@@ -14,7 +14,7 @@ export const clearAuthCredentials = () => {
 export const getAuthCredentials = () => authCredentials;
 
 interface RequestOptions extends RequestInit {
-    params?: Record<string, any>;
+    params?: Record<string, string | number | boolean>;
 }
 
 class ApiClient {
@@ -63,7 +63,7 @@ class ApiClient {
             try {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorData.error || errorMessage;
-            } catch (e) {
+            } catch {
                 // Fallback to text if JSON parsing fails
                 const text = await response.text().catch(() => '');
                 if (text) errorMessage = text;
@@ -73,10 +73,10 @@ class ApiClient {
 
         // Parsing JSON safely
         const contentType = response.headers.get('content-type');
-        let data: any = null;
+        let data: T = {} as T;
         if (contentType && contentType.includes('application/json')) {
             const text = await response.text();
-            data = text ? JSON.parse(text) : {};
+            data = (text ? JSON.parse(text) : {}) as T;
         }
 
         return { data };
@@ -86,7 +86,7 @@ class ApiClient {
         return this.request<T>(url, { ...options, method: 'GET' });
     }
 
-    async post<T>(url: string, body?: any, options: RequestOptions = {}) {
+    async post<T>(url: string, body?: unknown, options: RequestOptions = {}) {
         return this.request<T>(url, {
             ...options,
             method: 'POST',
@@ -94,7 +94,7 @@ class ApiClient {
         });
     }
 
-    async put<T>(url: string, body?: any, options: RequestOptions = {}) {
+    async put<T>(url: string, body?: unknown, options: RequestOptions = {}) {
         return this.request<T>(url, {
             ...options,
             method: 'PUT',
