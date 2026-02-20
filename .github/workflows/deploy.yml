@@ -99,6 +99,7 @@ jobs:
       # 2. BUILD & PUSH DOCKER IMAGES
       # ----------------------------------------------------------------
       - name: Log in to Container Registry
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -106,6 +107,7 @@ jobs:
           password: ${{ secrets.GH_PAT }}
 
       - name: Build and Push Backend
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v5
         with:
           context: ./backend
@@ -113,6 +115,7 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend:latest
 
       - name: Build and Push Frontend
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
@@ -125,6 +128,7 @@ jobs:
       # 3. WAIT FOR SSH
       # ----------------------------------------------------------------
       - name: Wait for SSH to be ready
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         run: |
           echo "Waiting for SSH to be ready on $SERVER_IP..."
           for i in {1..20}; do
@@ -142,6 +146,7 @@ jobs:
       # 4. DEPLOY WITH ANSIBLE
       # ----------------------------------------------------------------
       - name: Deploy with Ansible
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           SERVER_IP: ${{ env.SERVER_IP }}
