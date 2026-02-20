@@ -9,6 +9,7 @@ interface CourseListProps {
     isError: boolean;
     onEnroll: (courseId: number) => void;
     onRetry?: () => void;
+    isEnrolling?: boolean;
 }
 
 export const CourseList: React.FC<CourseListProps> = ({
@@ -17,6 +18,7 @@ export const CourseList: React.FC<CourseListProps> = ({
     isError,
     onEnroll,
     onRetry,
+    isEnrolling = false,
 }) => {
     if (isLoading) {
         return (
@@ -56,6 +58,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                     key={course.id}
                     course={course}
                     onEnroll={onEnroll}
+                    isEnrolling={isEnrolling}
                 />
             ))}
         </div>

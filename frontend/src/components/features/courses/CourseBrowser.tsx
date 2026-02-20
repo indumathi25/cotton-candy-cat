@@ -11,6 +11,7 @@ interface CourseBrowserProps {
     courseHistory: StudentCourseHistory;
     onEnroll: (courseId: number) => void;
     studentGradeLevel: number;
+    isEnrolling?: boolean;
 }
 
 export const CourseBrowser: React.FC<CourseBrowserProps> = ({
@@ -19,6 +20,7 @@ export const CourseBrowser: React.FC<CourseBrowserProps> = ({
     courseHistory,
     onEnroll,
     studentGradeLevel,
+    isEnrolling = false,
 }) => {
 
     const {
@@ -65,6 +67,7 @@ export const CourseBrowser: React.FC<CourseBrowserProps> = ({
                 isError={isError}
                 onEnroll={onEnroll}
                 onRetry={refetch}
+                isEnrolling={isEnrolling}
             />
         </div>
     );
