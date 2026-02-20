@@ -1,0 +1,121 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  AWS_REGION: 'eu-west-1'
+
+jobs:
+  deploy:
+    name: Provision & Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ----------------------------------------------------------------
+      # 1. TERRAFORM: Provision Infrastructure
+      # ----------------------------------------------------------------
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Terraform Init
+        working-directory: ./infrastructure/terraform
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: ./infrastructure/terraform
+        env:
+          TF_VAR_public_key: ${{ secrets.EC2_SSH_KEY_PUB }}
+        run: |
+          terraform apply -auto-approve
+          IP=$(terraform output -raw instance_public_ip)
+          echo "SERVER_IP=$IP" >> $GITHUB_ENV
+
+      # ----------------------------------------------------------------
+      # 2. BUILD & PUSH DOCKER IMAGES
+      # ----------------------------------------------------------------
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT }}
+
+      - name: Build and Push Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend:latest
+
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          build-args: |
+             VITE_API_URL=
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:latest
+
+      # ----------------------------------------------------------------
+      # 3. WAIT FOR SSH
+      # ----------------------------------------------------------------
+      - name: Wait for SSH to be ready
+        run: |
+          echo "Waiting for SSH to be ready on $SERVER_IP..."
+          for i in {1..20}; do
+            if nc -zv -w 5 $SERVER_IP 22; then
+              echo "SSH is ready!"
+              exit 0
+            fi
+            echo "SSH not ready yet, retrying in 10s... ($i/20)"
+            sleep 10
+          done
+          echo "Error: SSH connection timed out"
+          exit 1
+
+      # ----------------------------------------------------------------
+      # 4. DEPLOY WITH ANSIBLE
+      # ----------------------------------------------------------------
+      - name: Deploy with Ansible
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          SERVER_IP: ${{ env.SERVER_IP }}
+        run: |
+          # Create Private Key File
+          echo "$EC2_SSH_KEY" > deploy_key.pem
+          chmod 600 deploy_key.pem
+
+          # Create Inventory
+          echo "[servers]" > infrastructure/ansible/inventory.ini
+          echo "$SERVER_IP ansible_user=ubuntu ansible_ssh_private_key_file=./deploy_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> infrastructure/ansible/inventory.ini
+
+          # Install Ansible
+          sudo apt-get update && sudo apt-get install -y ansible
+
+          # Run Playbook
+          ansible-playbook -i infrastructure/ansible/inventory.ini infrastructure/ansible/playbook.yml \
+            --extra-vars "gh_user=${{ github.actor }} \
+                          gh_token=${{ secrets.GH_PAT }} \
+                          student_username=${{ secrets.STUDENT_USERNAME }} \
+                          student_password=${{ secrets.STUDENT_PASSWORD }} \
+                          admin_username=${{ secrets.ADMIN_USERNAME }} \
+                          admin_password=${{ secrets.ADMIN_PASSWORD }}"

@@ -21,6 +21,7 @@ This document provides a comprehensive technical overview of the Maplewood High 
 - **Semantic HTML**: strictly used HTML5 semantic elements (`<main>`, `<nav>`, `<header>`, `<article>`) to ensure screen reader compatibility.
 - **ARIA Patterns**: Components like `CourseCard` utilize `aria-label` and dynamic `disabled` states to provide meaningful context to assistive technologies.
 - **Tailwind CSS**: Employs a utility-first CSS approach, resulting in a tiny CSS footprint and high performance via aggressive "Just-In-Time" (JIT) compilation.
+- **Input Sanitization**: Integrated **DOMPurify** to sanitize user-generated content and effectively prevent Cross-Site Scripting (XSS) attacks.
 
 ---
 
@@ -46,6 +47,7 @@ The system manages complex academic dependencies using advanced graph theory con
     - **Authentication**: HTTP Basic Auth with **BCrypt** password hashing (Strongest standard for password storage).
     - **CORS Management**: Strict origin filtering restricted to the React frontend.
     - **Security Headers**: Hardened with **XSS Protection**, **Content Security Policy (CSP)**, **HSTS**, and **Frame Options (DENY)** to prevent clickjacking and injection attacks.
+    - **Input Validation**: Uses Spring's built-in validation (`@Valid`, `@NotNull`) to sanitize inputs and prevent injection attacks.
 - **Role-Based Access Control (RBAC)**: Endpoints are secured based on user roles (`STUDENT`, `ADMIN`) using `authorizeHttpRequests`.
 
 ### Language Features & Data Persistence
@@ -73,6 +75,22 @@ The system manages complex academic dependencies using advanced graph theory con
     - *Phase 1 (Build)*: Compiles Java via Maven and bundles React via Vite.
     - *Phase 2 (Production)*: Serves the JAR via JRE and the static frontend via a lightweight **Nginx** alpine image.
 - **Zero-Hardcoding Policy**: Dockerfiles use `ARG` and `ENV` mapping, ensuring no secrets or sensitive URLs are ever hardcoded in the image layers.
+
+---
+
+## 🚀 5. Future Enhancements
+
+### Planned Security Upgrades
+- **Authentication & Authorization**
+  - Migrate to **Auth0** using **OAuth 2.0 Authorization Code Flow with PKCE**
+  - **Rationale**: Authorization Code Flow with PKCE is the recommended best practice for Single Page Applications (SPAs) such as React. It prevents exposing client secrets in the frontend and mitigates authorization code interception attacks.
+  - **Backend Security**:
+    - JWT validation using Auth0’s **JWKS endpoint**
+    - Role-based access control (RBAC) enforced server-side
+    - CSRF protection for state-changing endpoints
+    - Secure HTTP headers (CSP, HSTS, X-Content-Type-Options)
+- **Dependency Management**
+  - Integrate **Snyk** or **OWASP Dependency-Check** in the CI/CD pipeline to flag vulnerable libraries.
 
 ---
 *Last Updated: February 2026*

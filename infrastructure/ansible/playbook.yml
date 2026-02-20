@@ -1,0 +1,65 @@
+---
+- name: Deploy Dev Tinder App
+  hosts: all
+  become: yes
+  vars:
+    app_dir: "/home/ubuntu/app"
+
+  tasks:
+    - name: Ensure app directory exists
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Copy Docker Compose file
+      copy:
+        src: ../docker-compose.yml
+        dest: "{{ app_dir }}/docker-compose.yml"
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Create .env file with secrets
+      copy:
+        dest: "{{ app_dir }}/.env"
+        owner: ubuntu
+        group: ubuntu
+        content: |
+          SPRING_DATASOURCE_URL=jdbc:sqlite:database/maplewood_school.sqlite?journal_mode=WAL&busy_timeout=5000
+          STUDENT_USERNAME={{ student_username | default('student') }}
+          STUDENT_PASSWORD={{ student_password }}
+          ADMIN_USERNAME={{ admin_username | default('admin') }}
+          ADMIN_PASSWORD={{ admin_password }} 
+          VITE_STUDENT_USERNAME={{ student_username | default('student') }}
+          VITE_STUDENT_PASSWORD={{ student_password }}
+          VITE_ADMIN_USERNAME={{ admin_username | default('admin') }}
+          VITE_ADMIN_PASSWORD={{ admin_password }}
+          VITE_API_URL=
+          FRONTEND_PORT=80
+
+    - name: Copy Database Directory
+      copy:
+        src: ../database/
+        dest: "{{ app_dir }}/database/"
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Login to GitHub Container Registry
+      docker_login:
+        registry_url: ghcr.io
+        username: "{{ gh_user }}"
+        password: "{{ gh_token }}"
+      become_user: ubuntu
+
+    - name: Pull latest images
+      command: docker compose pull
+      args:
+        chdir: "{{ app_dir }}"
+      become_user: ubuntu
+
+    - name: Start Docker Compose
+      command: docker compose up -d
+      args:
+        chdir: "{{ app_dir }}"
+      become_user: ubuntu

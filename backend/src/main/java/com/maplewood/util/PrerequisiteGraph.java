@@ -1,6 +1,7 @@
 package com.maplewood.util;
 
 import com.maplewood.model.Course;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -12,6 +13,7 @@ import java.util.*;
  * sorting
  * and impact analysis.
  */
+@Slf4j
 @Component
 public class PrerequisiteGraph {
     // Adjacency list: Course ID -> List of dependent Course IDs (courses that
@@ -28,6 +30,7 @@ public class PrerequisiteGraph {
      * Initializes the graph from a list of courses.
      */
     public void buildGraph(List<Course> courses) {
+        log.info("Building Prerequisite Graph from {} courses", courses.size());
         adjList.clear();
         prerequisites.clear();
         courseMap.clear();
@@ -35,11 +38,13 @@ public class PrerequisiteGraph {
         for (Course course : courses) {
             courseMap.put(course.getId(), course);
             if (course.getPrerequisiteId() != null) {
+                log.debug("Course {} ({}) requires {}", course.getName(), course.getId(), course.getPrerequisiteId());
                 prerequisites.put(course.getId(), course.getPrerequisiteId());
                 // Build adjacency list (forward direction)
                 adjList.computeIfAbsent(course.getPrerequisiteId(), k -> new ArrayList<>()).add(course.getId());
             }
         }
+        log.info("Graph built. Edges: {}", prerequisites.size());
     }
 
     /**
@@ -120,18 +125,22 @@ public class PrerequisiteGraph {
      * A].
      */
     public List<Course> getDeepPrerequisites(Long courseId) {
+        log.info("Resolving deep prerequisites for Course ID: {}", courseId);
         List<Course> allPrereqs = new ArrayList<>();
         Long currentPrereqId = prerequisites.get(courseId);
 
         while (currentPrereqId != null) {
             Course prereq = courseMap.get(currentPrereqId);
             if (prereq != null) {
+                log.info("  -> Found prerequisite: {} (ID: {})", prereq.getName(), prereq.getId());
                 allPrereqs.add(prereq);
                 currentPrereqId = prerequisites.get(currentPrereqId);
             } else {
+                log.warn("  -> Prerequisite ID {} found in map but missing from courseMap!", currentPrereqId);
                 break;
             }
         }
+        log.info("Total prerequisites found for Course {}: {}", courseId, allPrereqs.size());
         return allPrereqs;
     }
 }
