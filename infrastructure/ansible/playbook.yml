@@ -46,20 +46,17 @@
         group: ubuntu
 
     - name: Login to GitHub Container Registry
-      docker_login:
-        registry_url: ghcr.io
-        username: "{{ gh_user }}"
-        password: "{{ gh_token }}"
-      become_user: ubuntu
+      shell: echo "{{ gh_token }}" | docker login ghcr.io -u "{{ gh_user }}" --password-stdin
+      become: yes
 
     - name: Pull latest images
       command: docker compose pull
       args:
         chdir: "{{ app_dir }}"
-      become_user: ubuntu
+      become: yes
 
     - name: Start Docker Compose
-      command: docker compose up -d
+      command: docker compose up -d --remove-orphans
       args:
         chdir: "{{ app_dir }}"
-      become_user: ubuntu
+      become: yes
