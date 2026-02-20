@@ -15,7 +15,7 @@
 
     - name: Copy Docker Compose file
       copy:
-        src: ../docker-compose.yml
+        src: ../../docker-compose.yml
         dest: "{{ app_dir }}/docker-compose.yml"
         owner: ubuntu
         group: ubuntu
@@ -40,7 +40,7 @@
 
     - name: Copy Database Directory
       copy:
-        src: ../database/
+        src: ../../database/
         dest: "{{ app_dir }}/database/"
         owner: ubuntu
         group: ubuntu
