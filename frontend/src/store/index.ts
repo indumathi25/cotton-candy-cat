@@ -15,12 +15,14 @@ import { combineReducers } from '@reduxjs/toolkit';
 import authReducer from './authSlice';
 import enrollmentReducer from './enrollmentSlice';
 import uiReducer from './uiSlice';
+import studentReducer from './studentSlice';
 
 // ─── Root Reducer ─────────────────────────────────────────────────────────────
 const rootReducer = combineReducers({
     auth: authReducer,       // Auth + credentials (persisted)
     enrollment: enrollmentReducer, // Enrollment status, pending sections, notifications (session-only)
-    ui: uiReducer,         // Course filters, schedule view mode (session-only)
+    ui: uiReducer,           // Course filters, schedule view mode (session-only)
+    student: studentReducer, // Student course history (session-only, re-fetched on mount)
 });
 
 // ─── Persist Config ───────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import apiClient from './client';
-import { StudentProfile, StudentSchedule, StudentCourseHistory, GradeReport } from '../types/api';
+import { StudentProfile, StudentSchedule, StudentCourseHistory, GradeReport } from '../types/student';
 
 /**
  * Get student profile with GPA and academic progress

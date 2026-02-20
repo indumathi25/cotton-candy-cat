@@ -58,7 +58,7 @@ export interface StudentEnrollmentDTO {
     courseName: string;
     courseCode: string;
     semesterOrder: number;
-    grade: string;
+    grade?: string;
     credits: number;
     status: string; // 'active', 'completed', 'dropped'
 }

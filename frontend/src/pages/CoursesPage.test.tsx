@@ -9,6 +9,7 @@ import { CoursesPage } from './CoursesPage';
 import enrollmentReducer from '../store/enrollmentSlice';
 import uiReducer from '../store/uiSlice';
 import authReducer from '../store/authSlice';
+import studentReducer from '../store/studentSlice';
 import type { UserRole } from '../types/auth';
 
 // ─── Mock all API calls ────────────────────────────────────────────────────────
@@ -89,7 +90,7 @@ const mockSection = { id: 99, capacity: 30, timeSlot: { dayOfWeek: 'Monday', sta
 // ─── Render Helper ────────────────────────────────────────────────────────────
 const renderPage = () => {
     const store = configureStore({
-        reducer: { auth: authReducer, enrollment: enrollmentReducer, ui: uiReducer },
+        reducer: { auth: authReducer, enrollment: enrollmentReducer, ui: uiReducer, student: studentReducer },
         preloadedState: {
             auth: {
                 user: { studentId: 101, role: 'STUDENT' as UserRole, username: 'student' },
@@ -98,6 +99,7 @@ const renderPage = () => {
             },
             enrollment: { pendingSections: [], enrolledSectionIds: [], status: 'idle' as const, error: null, notifications: [] },
             ui: { courseFilter: { selectedGrade: null, searchTerm: '', currentPage: 0, pageSize: 20 }, scheduleViewMode: 'grid' as const, sidebarOpen: false },
+            student: { history: mockHistory, historyStatus: 'succeeded' as const, historyError: null },
         },
     });
 

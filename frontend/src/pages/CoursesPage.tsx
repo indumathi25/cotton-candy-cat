@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
 import { CourseBrowser } from '../components/features/courses/CourseBrowser';
@@ -11,9 +11,12 @@ import {
     selectNotifications,
     dismissNotification,
 } from '../store/enrollmentSlice';
+import {
+    fetchStudentHistory,
+    selectStudentHistory,
+} from '../store/studentSlice';
 import { LoadingSkeleton } from '../components/common';
-import { useStudentHistory, useStudentProfile } from '../hooks/useStudentData';
-import { StudentCourseHistory } from '../types/api';
+import { useStudentProfile } from '../hooks/useStudentData';
 import { AppDispatch } from '../store';
 
 export const CoursesPage: React.FC = () => {
@@ -24,16 +27,15 @@ export const CoursesPage: React.FC = () => {
     const selectedGrade = useSelector(selectSelectedGrade);
     const enrollStatus = useSelector(selectEnrollmentStatus);
     const notifications = useSelector(selectNotifications);
+    const studentCourseHistory = useSelector(selectStudentHistory);
     const studentId = user?.studentId || 101;
 
     const { data: profile, isLoading: profileLoading } = useStudentProfile(studentId);
-    const { data: history } = useStudentHistory(studentId);
 
-    const studentCourseHistory: StudentCourseHistory = history || {
-        completedCourseIds: [],
-        activeCourseIds: [],
-        allEnrollments: [],
-    };
+    // ── Fetch course history into Redux on mount ───────────────────────────
+    useEffect(() => {
+        dispatch(fetchStudentHistory(studentId));
+    }, [dispatch, studentId]);
 
     // ── Single dispatch — thunk owns the entire operation ──────────────────
     const handleEnroll = async (courseId: number) => {
@@ -41,11 +43,12 @@ export const CoursesPage: React.FC = () => {
 
         const result = await dispatch(enrollStudent({ studentId: user.studentId, courseId }));
 
-        // On success, invalidate react-query cache so schedule/profile refresh
+        // On success, invalidate react-query cache so schedule/profile refresh,
+        // and re-fetch history into Redux so validation reflects new enrollment
         if (enrollStudent.fulfilled.match(result)) {
             queryClient.invalidateQueries({ queryKey: ['student', 'schedule', studentId] });
             queryClient.invalidateQueries({ queryKey: ['student', 'profile', studentId] });
-            queryClient.invalidateQueries({ queryKey: ['student', 'history', studentId] });
+            dispatch(fetchStudentHistory(studentId));
         }
     };
 
@@ -86,8 +89,7 @@ export const CoursesPage: React.FC = () => {
             <CourseBrowser
                 selectedGrade={selectedGrade}
                 onGradeChange={(grade) => dispatch(setSelectedGrade(grade))}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                courseHistory={studentCourseHistory as any}
+                courseHistory={studentCourseHistory}
                 onEnroll={handleEnroll}
                 studentGradeLevel={profile?.gradeLevel || 9}
                 isEnrolling={enrollStatus === 'loading'}

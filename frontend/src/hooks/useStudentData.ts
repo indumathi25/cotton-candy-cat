@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { getStudentProfile, getStudentSchedule, getStudentHistory, getGradeReport } from '../api/studentService';
-import { StudentProfile, StudentSchedule, StudentCourseHistory, GradeReport } from '../types/api';
+import { StudentProfile, StudentSchedule, StudentCourseHistory, GradeReport } from '../types/student';
 
 export const useStudentProfile = (id: number): UseQueryResult<StudentProfile, Error> => {
     return useQuery({

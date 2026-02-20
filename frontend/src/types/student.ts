@@ -23,6 +23,7 @@ export interface StudentEnrollment {
     courseCode: string;
     semesterOrder: number;
     grade?: string;
+    credits: number;
     status: 'active' | 'completed' | 'dropped';
 }
 
