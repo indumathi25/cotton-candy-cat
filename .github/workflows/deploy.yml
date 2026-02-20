@@ -1,9 +1,7 @@
 name: Deploy to AWS EC2
 
 on:
-  push:
-    branches: [ "main", "master" ]
-  workflow_dispatch:
+  workflow_dispatch: # Run manually from GitHub Actions UI when ready to deploy
 
 env:
   REGISTRY: ghcr.io
