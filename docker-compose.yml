@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     image: ghcr.io/indumathi25/cotton-candy-cat/backend:latest
