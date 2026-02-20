@@ -100,13 +100,13 @@ jobs:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           SERVER_IP: ${{ env.SERVER_IP }}
         run: |
-          # Create Private Key File
-          echo "$EC2_SSH_KEY" > deploy_key.pem
-          chmod 600 deploy_key.pem
+          # Write private key from secret to file
+          echo "$EC2_SSH_KEY" > /tmp/deploy_key.pem
+          chmod 600 /tmp/deploy_key.pem
 
           # Create Inventory
           echo "[servers]" > infrastructure/ansible/inventory.ini
-          echo "$SERVER_IP ansible_user=ubuntu ansible_ssh_private_key_file=./deploy_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> infrastructure/ansible/inventory.ini
+          echo "$SERVER_IP ansible_user=ubuntu ansible_ssh_private_key_file=/tmp/deploy_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> infrastructure/ansible/inventory.ini
 
           # Install Ansible
           sudo apt-get update && sudo apt-get install -y ansible
@@ -119,3 +119,4 @@ jobs:
                           student_password=${{ secrets.STUDENT_PASSWORD }} \
                           admin_username=${{ secrets.ADMIN_USERNAME }} \
                           admin_password=${{ secrets.ADMIN_PASSWORD }}"
+

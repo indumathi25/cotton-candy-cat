@@ -11,4 +11,9 @@ variable "instance_type" {
 variable "public_key" {
   description = "Public SSH key content (provided via TF_VAR_public_key in CI)"
   type        = string
+
+  validation {
+    condition     = length(var.public_key) > 0
+    error_message = "public_key must not be empty. Set the EC2_SSH_KEY_PUB GitHub Secret with your public SSH key."
+  }
 }
