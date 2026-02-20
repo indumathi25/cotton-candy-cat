@@ -11,13 +11,24 @@ This system provides course enrollment management and academic tracking for high
 **Backend**
 - Spring Boot 3.x (Java 17)
 - SQLite with Hibernate ORM
-- Spring Security (HTTP Basic Auth)
+- Spring Security (HTTP Basic Auth + BCrypt)
+- Spring Validation (Jakarta Bean Validation)
 - Maven
 
 **Frontend**
 - React 19 with TypeScript
+- Vite 7 (Modern build pipeline)
 - Tailwind CSS
-- npm/Vite (Modern build pipeline)
+- Redux Toolkit + redux-persist
+- TanStack Query (React Query)
+- DOMPurify (XSS sanitization)
+
+**Infrastructure & DevOps**
+- Docker & Docker Compose
+- GitHub Actions (CI/CD)
+- Terraform (AWS EC2 provisioning)
+- Ansible (server configuration & deployment)
+- GHCR (GitHub Container Registry)
 
 ## Prerequisites
 
@@ -25,7 +36,7 @@ This system provides course enrollment management and academic tracking for high
 - Node.js 20+ (Required for Vite 7)
 - Maven 3.8+
 - Python 3 (for database setup)
-- Docker & Docker Compose (optional)
+- Docker & Docker Compose
 
 ## Getting Started
 
@@ -33,14 +44,12 @@ This system provides course enrollment management and academic tracking for high
 
 ```bash
 # From project root
-python3 populate_database.py
+python3 database/populate_database.py
 ```
 
-> **Note**: The script creates `maplewood_school.sqlite` in the project root. Docker Compose automatically mounts it from there.
+> **Note**: Creates `maplewood_school.sqlite` in the `database/` directory. Docker Compose automatically mounts it.
 
 ### 2. Configure Environment Variables
-
-Copy the example environment file and customize it if needed:
 
 ```bash
 cp .env.example .env
@@ -51,16 +60,12 @@ The default values are pre-configured for local Docker development.
 ### 3. Run with Docker (Recommended)
 
 ```bash
-# Build and start the containers
 make build
 make up
 ```
 
 - Frontend: `http://localhost:3000`
 - Backend API: `http://localhost:8080`
-
-### 📘 Architecture & Modernization
-Check out [**ARCHITECTURE_DECISIONS.md**](./ARCHITECTURE_DECISIONS.md) to learn about the Vite migration, React Compiler integration, and our security/configuration standards.
 
 ### Alternative: Run Locally
 
@@ -77,7 +82,21 @@ npm install
 npm run dev
 ```
 
+## Testing
+
+```bash
+# Backend unit tests
+make test-backend   # or: cd backend && mvn test
+
+# Frontend unit tests
+make test-frontend  # or: cd frontend && npm test
+```
+
+CI runs automatically on every push and pull request via GitHub Actions.
+
 ## Authentication
+
+Credentials are loaded from `.env`. Default values:
 
 | Role    | Username  | Password   |
 |---------|-----------|------------|
@@ -86,7 +105,7 @@ npm run dev
 
 ## API Documentation
 
-See [`backend/README.md`](backend/README.md) for detailed API testing guide.
+See [`backend/README.md`](backend/README.md) for a detailed API testing guide.
 
 **Quick Test:**
 ```bash
@@ -97,31 +116,40 @@ curl -u admin:admin http://localhost:8080/api/students/101 | jq
 
 ```
 cotton-candy-cat/
-├── backend/              # Spring Boot API
-│   ├── src/main/java/com/maplewood/
-│   │   ├── controller/
-│   │   ├── service/
-│   │   ├── repository/
-│   │   ├── model/
-│   │   └── config/
-│   └── pom.xml
-├── frontend/             # React App
-│   ├── src/
-│   └── package.json
-├── populate_database.py
-└── docker-compose.yml
+├── .github/workflows/
+│   ├── ci.yml              # Tests on every push/PR
+│   └── deploy.yml          # Manual deploy to AWS EC2
+├── backend/                # Spring Boot API
+│   └── src/main/java/com/maplewood/
+├── frontend/               # React App (Vite + TypeScript)
+│   └── src/
+├── infrastructure/
+│   ├── terraform/          # AWS EC2 provisioning
+│   └── ansible/            # Server configuration & deployment
+├── database/               # SQLite database & seed script
+├── docker-compose.yml
+├── Makefile
+└── ARCHITECTURE_DECISIONS.md
 ```
+
+## Architecture & Modernization
+
+See [**ARCHITECTURE_DECISIONS.md**](./ARCHITECTURE_DECISIONS.md) for details on:
+- Vite 7 migration & React 19 Compiler
+- DAG-based prerequisite management
+- Security hardening (CSP, HSTS, XSS protection)
+- Transaction management & clean service architecture
+- Planned enhancements (Auth0, Snyk/OWASP dependency scanning)
 
 ## Best Practices
 
-- **Advanced DSA**: Prerequisite logic modeled as a Directed Acyclic Graph (DAG) with Topological Sorting
-- **React Compiler**: Automatic memoization (no manual useMemo/useCallback) via React 19 Compiler
-- **Transaction Management**: All write operations use `@Transactional` for data consistency
-- **Input Validation**: Request DTOs validated with Jakarta Validation
-- **Error Handling**: Centralized exception handling with meaningful error messages
-- **Security**: Role-based access control and hardened security headers
-- **Code Organization**: Clean architecture with separated layers (Controller → Service → Repository)
-- **Testing**: Run `./mvnw test` (backend) and `npm test` (frontend) before deployment
+- **Advanced DSA**: Prerequisite logic modeled as a DAG with Topological Sorting & Cycle Detection
+- **React Compiler**: Automatic memoization via React 19 Compiler (no manual `useMemo`/`useCallback`)
+- **Input Sanitization**: DOMPurify (frontend XSS prevention) + Jakarta Validation (`@Valid`) on all DTOs
+- **Transaction Management**: All write operations use `@Transactional` for ACID guarantees
+- **Error Handling**: Centralized `@ControllerAdvice` with standardized JSON error responses
+- **Security**: Role-based access control, hardened headers, strict CORS
+- **Testing**: Backend (JUnit) + Frontend (Vitest) run on every CI push
 
 ## License
 
