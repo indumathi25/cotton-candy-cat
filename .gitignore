@@ -43,3 +43,4 @@ frontend/build/
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
+.secrets
