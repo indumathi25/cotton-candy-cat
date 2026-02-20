@@ -66,11 +66,10 @@ resource "aws_security_group" "instance_sg" {
   }
 }
 
-# Create Key Pair (using local public key)
-# Assumes you have ~/.ssh/id_rsa.pub. If not, generate one or change path.
+# Create Key Pair (public key provided via TF_VAR_public_key environment variable in CI)
 resource "aws_key_pair" "deployer" {
   key_name   = "maplewood-key"
-  public_key = var.public_key != "" ? var.public_key : file(var.public_key_path)
+  public_key = var.public_key
 }
 
 # Get latest Ubuntu 22.04 AMI

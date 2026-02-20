@@ -8,14 +8,7 @@ variable "instance_type" {
   default     = "t3.micro"
 }
 
-variable "public_key_path" {
-  description = "Path to the public SSH key to be used for the EC2 instance"
-  # User needs to ensure this file exists or update the path
-  default     = "~/.ssh/id_rsa.pub"
-}
-
 variable "public_key" {
-  description = "Public SSH key content"
+  description = "Public SSH key content (provided via TF_VAR_public_key in CI)"
   type        = string
-  default     = ""
 }
