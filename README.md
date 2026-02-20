@@ -129,6 +129,7 @@ cotton-candy-cat/
 ├── database/               # SQLite database & seed script
 ├── docker-compose.yml
 ├── Makefile
+├── enrollment-sequence-diagram.png  # Enrollment flow diagram
 └── ARCHITECTURE_DECISIONS.md
 ```
 
@@ -140,6 +141,13 @@ See [**ARCHITECTURE_DECISIONS.md**](./ARCHITECTURE_DECISIONS.md) for details on:
 - Security hardening (CSP, HSTS, XSS protection)
 - Transaction management & clean service architecture
 - Planned enhancements (Auth0, Snyk/OWASP dependency scanning)
+
+### Enrollment Request Flow
+
+> End-to-end flow from a student clicking "Enroll" through the Redux thunk, REST API, business validation, database write, and back to the UI.
+
+![Enrollment Sequence Diagram](enrollment-sequence-diagram.png)
+
 
 ## Best Practices
 

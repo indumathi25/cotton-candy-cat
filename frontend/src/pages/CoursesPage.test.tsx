@@ -9,6 +9,7 @@ import { CoursesPage } from './CoursesPage';
 import enrollmentReducer from '../store/enrollmentSlice';
 import uiReducer from '../store/uiSlice';
 import authReducer from '../store/authSlice';
+import type { UserRole } from '../types/auth';
 
 // ─── Mock all API calls ────────────────────────────────────────────────────────
 vi.mock('../api/courseService', () => ({
@@ -89,10 +90,9 @@ const mockSection = { id: 99, capacity: 30, timeSlot: { dayOfWeek: 'Monday', sta
 const renderPage = () => {
     const store = configureStore({
         reducer: { auth: authReducer, enrollment: enrollmentReducer, ui: uiReducer },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         preloadedState: {
             auth: {
-                user: { studentId: 101, role: 'student' as any, username: 'student' },
+                user: { studentId: 101, role: 'STUDENT' as UserRole, username: 'student' },
                 credentials: { username: 'student', password: 'password' },
                 isAuthenticated: true,
             },
