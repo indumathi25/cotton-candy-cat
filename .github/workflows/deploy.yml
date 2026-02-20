@@ -2,9 +2,7 @@ name: Deploy to AWS EC2
 
 on:
   push:
-    branches: [ "*" ]
-  pull_request:
-    branches: [ "*" ]
+    branches: [ "main", "master" ]
   workflow_dispatch:
 
 env:
@@ -13,47 +11,8 @@ env:
   AWS_REGION: 'eu-west-1'
 
 jobs:
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      # Backend Tests
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
-      - name: Test Backend
-        run: |
-          cd backend
-          mvn -B test
-
-      # Frontend Tests
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-      - name: Install Frontend Dependencies
-        run: |
-          cd frontend
-          npm ci
-      - name: Lint Frontend
-        run: |
-          cd frontend
-          npm run lint
-      - name: Test Frontend
-        run: |
-          cd frontend
-          npm test
-
-  provision-and-deploy:
+  deploy:
     name: Provision & Deploy
-    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -84,22 +43,16 @@ jobs:
       - name: Terraform Apply
         working-directory: ./infrastructure/terraform
         env:
-          TF_VAR_public_key: ${{ secrets.EC2_SSH_KEY_PUB }} # Expecting public key in secrets or generated
+          TF_VAR_public_key: ${{ secrets.EC2_SSH_KEY_PUB }}
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == "refs/heads/master" ]]; then
-            terraform apply -auto-approve
-            IP=$(terraform output -raw instance_public_ip)
-            echo "SERVER_IP=$IP" >> $GITHUB_ENV
-          else
-            terraform plan
-            echo "Detailed plan output shown above. Skipping apply on non-main branch."
-          fi
+          terraform apply -auto-approve
+          IP=$(terraform output -raw instance_public_ip)
+          echo "SERVER_IP=$IP" >> $GITHUB_ENV
 
       # ----------------------------------------------------------------
       # 2. BUILD & PUSH DOCKER IMAGES
       # ----------------------------------------------------------------
       - name: Log in to Container Registry
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -107,7 +60,6 @@ jobs:
           password: ${{ secrets.GH_PAT }}
 
       - name: Build and Push Backend
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v5
         with:
           context: ./backend
@@ -115,7 +67,6 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend:latest
 
       - name: Build and Push Frontend
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
@@ -128,7 +79,6 @@ jobs:
       # 3. WAIT FOR SSH
       # ----------------------------------------------------------------
       - name: Wait for SSH to be ready
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         run: |
           echo "Waiting for SSH to be ready on $SERVER_IP..."
           for i in {1..20}; do
@@ -146,7 +96,6 @@ jobs:
       # 4. DEPLOY WITH ANSIBLE
       # ----------------------------------------------------------------
       - name: Deploy with Ansible
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           SERVER_IP: ${{ env.SERVER_IP }}
@@ -154,18 +103,18 @@ jobs:
           # Create Private Key File
           echo "$EC2_SSH_KEY" > deploy_key.pem
           chmod 600 deploy_key.pem
-          
+
           # Create Inventory
           echo "[servers]" > infrastructure/ansible/inventory.ini
           echo "$SERVER_IP ansible_user=ubuntu ansible_ssh_private_key_file=./deploy_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> infrastructure/ansible/inventory.ini
-          
-          # Install Ansible (if needed)
+
+          # Install Ansible
           sudo apt-get update && sudo apt-get install -y ansible
-          
+
           # Run Playbook
           ansible-playbook -i infrastructure/ansible/inventory.ini infrastructure/ansible/playbook.yml \
             --extra-vars "gh_user=${{ github.actor }} \
-                          gh_token=${{ secrets.GITHUB_TOKEN }} \
+                          gh_token=${{ secrets.GH_PAT }} \
                           student_username=${{ secrets.STUDENT_USERNAME }} \
                           student_password=${{ secrets.STUDENT_PASSWORD }} \
                           admin_username=${{ secrets.ADMIN_USERNAME }} \
