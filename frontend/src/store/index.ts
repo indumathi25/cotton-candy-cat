@@ -17,7 +17,6 @@ import enrollmentReducer from './enrollmentSlice';
 import uiReducer from './uiSlice';
 import studentReducer from './studentSlice';
 
-// ─── Root Reducer ─────────────────────────────────────────────────────────────
 const rootReducer = combineReducers({
     auth: authReducer,       // Auth + credentials (persisted)
     enrollment: enrollmentReducer, // Enrollment status, pending sections, notifications (session-only)
@@ -25,7 +24,6 @@ const rootReducer = combineReducers({
     student: studentReducer, // Student course history (session-only, re-fetched on mount)
 });
 
-// ─── Persist Config ───────────────────────────────────────────────────────────
 // Only persist auth — enrollment & UI are session state, reset on refresh intentionally
 const persistConfig = {
     key: 'root',
@@ -36,7 +34,6 @@ const persistConfig = {
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// ─── Store ────────────────────────────────────────────────────────────────────
 export const store = configureStore({
     reducer: persistedReducer,
     middleware: (getDefaultMiddleware) =>
@@ -50,6 +47,5 @@ export const store = configureStore({
 
 export const persistor = persistStore(store);
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

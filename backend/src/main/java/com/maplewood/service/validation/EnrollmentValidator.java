@@ -26,9 +26,6 @@ public class EnrollmentValidator {
 
     /**
      * Executes all enrollment validation rules.
-     * 
-     * @return Optional containing the error message if a rule is violated, or empty
-     *         if valid.
      */
     public Optional<String> validate(Student student, CourseSection section, Semester activeSemester) {
         log.info("Starting enrollment validation for Student ID: {} in Section ID: {}", student.getId(),

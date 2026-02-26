@@ -10,7 +10,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { setAuthCredentials } from './api/client';
 import toast, { Toaster } from 'react-hot-toast';
 
-// Subscribe to Redux store changes to sync API credentials
 store.subscribe(() => {
   const state = store.getState();
   if (state.auth.credentials) {
@@ -24,14 +23,11 @@ store.subscribe(() => {
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
-      // Background queries failing might not need a toast if it's just a refetch
-      // But we can log it or show a quiet notification
       console.error('Query Error:', error.message);
     },
   }),
   mutationCache: new MutationCache({
     onError: (error) => {
-      // Mutations (POST/PUT/DELETE) usually need immediate feedback
       toast.error(error.message || 'Something went wrong');
     },
   }),

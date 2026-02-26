@@ -9,13 +9,6 @@ export interface ValidationResult {
     prerequisiteCourseName?: string;
 }
 
-/**
- * Validates if a student can enroll in a course
- * @param course - The course to validate
- * @param studentGradeLevel - Student's current grade level
- * @param courseHistory - Student's enrollment history
- * @param allCourses - Map of all available courses (for prerequisite lookup)
- */
 export const validateEnrollment = (
     course: Course,
     studentGradeLevel: number,
@@ -58,9 +51,7 @@ export const validateEnrollment = (
     };
 };
 
-/**
- * Enriches courses with enrollment status for a student
- */
+
 export const enrichCoursesWithEnrollmentStatus = (
     courses: Course[],
     studentGradeLevel: number,
@@ -80,9 +71,7 @@ export const enrichCoursesWithEnrollmentStatus = (
     });
 };
 
-/**
- * Gets a human-readable message for enrollment block reasons
- */
+
 export const getEnrollmentBlockMessage = (
     reason: EnrollmentBlockReason,
     prerequisiteCourseName?: string

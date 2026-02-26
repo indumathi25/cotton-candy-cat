@@ -4,31 +4,25 @@ import com.maplewood.dto.EnrollmentResponseDTO;
 import com.maplewood.model.CourseSection;
 import com.maplewood.model.Enrollment;
 import com.maplewood.model.Student;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class EnrollmentMapper {
+@Mapper(componentModel = "spring")
+public interface EnrollmentMapper {
 
-    public EnrollmentResponseDTO toEnrollmentResponseDTO(@NonNull Enrollment enrollment, String semesterName) {
-        return EnrollmentResponseDTO.builder()
-                .enrollmentId(enrollment.getId())
-                .studentName(enrollment.getStudent().getFirstName() + " "
-                        + enrollment.getStudent().getLastName())
-                .courseName(enrollment.getCourseSection().getCourse().getName())
-                .semesterName(semesterName)
-                .status("SUCCESS")
-                .message("Successfully enrolled")
-                .build();
-    }
+        @Mapping(target = "enrollmentId", source = "enrollment.id")
+        @Mapping(target = "studentName", expression = "java(enrollment.getStudent().getFirstName() + \" \" + enrollment.getStudent().getLastName())")
+        @Mapping(target = "courseName", source = "enrollment.courseSection.course.name")
+        @Mapping(target = "semesterName", source = "semesterName")
+        @Mapping(target = "status", constant = "SUCCESS")
+        @Mapping(target = "message", constant = "Successfully enrolled")
+        EnrollmentResponseDTO toEnrollmentResponseDTO(Enrollment enrollment, String semesterName);
 
-    public EnrollmentResponseDTO toErrorResponse(@NonNull Student student, @NonNull CourseSection section,
-            String message) {
-        return EnrollmentResponseDTO.builder()
-                .studentName(student.getFirstName() + " " + student.getLastName())
-                .courseName(section.getCourse().getName())
-                .status("FAILED")
-                .message(message)
-                .build();
-    }
+        @Mapping(target = "studentName", expression = "java(student.getFirstName() + \" \" + student.getLastName())")
+        @Mapping(target = "courseName", source = "section.course.name")
+        @Mapping(target = "status", constant = "FAILED")
+        @Mapping(target = "message", source = "message")
+        @Mapping(target = "enrollmentId", ignore = true)
+        @Mapping(target = "semesterName", ignore = true)
+        EnrollmentResponseDTO toErrorResponse(Student student, CourseSection section, String message);
 }

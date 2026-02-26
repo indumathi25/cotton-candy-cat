@@ -35,19 +35,9 @@ const initialState: EnrollmentState = {
     notifications: [],
 };
 
-// ─── Async Thunk ──────────────────────────────────────────────────────────────
-// The thunk owns the ENTIRE enrollment operation:
-//   1. Fetch available sections for the course
-//   2. Pick the first available section
-//   3. POST the enrollment
-// The calling component only needs to dispatch one action.
-
 export const enrollStudent = createAsyncThunk(
     'enrollment/enroll',
-    async (
-        { studentId, courseId }: { studentId: number; courseId: number },
-        { rejectWithValue }
-    ) => {
+    async ({ studentId, courseId }: { studentId: number; courseId: number }, { rejectWithValue }) => {
         try {
             // Step 1: Fetch sections for this course
             const sections = await getCourseSections(courseId);
@@ -68,10 +58,22 @@ export const enrollStudent = createAsyncThunk(
                 err instanceof Error ? err.message : 'Enrollment failed. Please try again.';
             return rejectWithValue(message);
         }
+    },
+    {
+        condition: ({ courseId }, { getState }) => {
+            const { enrollment } = getState() as RootState;
+            // Bail if this course is already pending or if we already have it enrolled
+            if (enrollment.pendingSections.includes(courseId)) {
+                return false;
+            }
+            if (enrollment.enrolledSectionIds.includes(courseId)) {
+                return false;
+            }
+            return true;
+        },
     }
 );
 
-// ─── Slice ────────────────────────────────────────────────────────────────────
 
 export const enrollmentSlice = createSlice({
     name: 'enrollment',
@@ -90,7 +92,6 @@ export const enrollmentSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // ── Pending: mark section as in-flight ──────────────────────────
             .addCase(enrollStudent.pending, (state, action) => {
                 state.status = 'loading';
                 state.error = null;
@@ -98,7 +99,6 @@ export const enrollmentSlice = createSlice({
                 state.pendingSections.push(action.meta.arg.courseId);
             })
 
-            // ── Fulfilled: enrollment succeeded ─────────────────────────────
             .addCase(enrollStudent.fulfilled, (state, action) => {
                 const { sectionId, courseId } = action.payload;
                 state.status = 'succeeded';
@@ -107,35 +107,41 @@ export const enrollmentSlice = createSlice({
                 if (!state.enrolledSectionIds.includes(sectionId)) {
                     state.enrolledSectionIds.push(sectionId);
                 }
-                state.notifications.push({
-                    id: `enroll-success-${Date.now()}`,
-                    type: 'success',
-                    title: 'Enrollment Successful!',
-                    message: `Successfully enrolled! Your schedule has been updated.`,
-                    timestamp: Date.now(),
-                });
+                const message = `Successfully enrolled! Your schedule has been updated.`;
+                // Shows only one notification at a time
+                const isDuplicate = state.notifications.some(n => n.message === message && n.type === 'success');
+                if (!isDuplicate) {
+                    state.notifications.push({
+                        id: `enroll-success-${Date.now()}`,
+                        type: 'success',
+                        title: 'Enrollment Successful!',
+                        message,
+                        timestamp: Date.now(),
+                    });
+                }
             })
 
-            // ── Rejected: enrollment failed ──────────────────────────────────
             .addCase(enrollStudent.rejected, (state, action) => {
                 const courseId = action.meta.arg.courseId;
                 state.status = 'failed';
                 state.error = action.payload as string;
                 state.pendingSections = state.pendingSections.filter(id => id !== courseId);
-                state.notifications.push({
-                    id: `enroll-error-${Date.now()}`,
-                    type: 'error',
-                    title: 'Enrollment Failed',
-                    message: action.payload as string,
-                    timestamp: Date.now(),
-                });
+                const message = action.payload as string;
+                const isDuplicate = state.notifications.some(n => n.message === message && n.type === 'error');
+                if (!isDuplicate) {
+                    state.notifications.push({
+                        id: `enroll-error-${Date.now()}`,
+                        type: 'error',
+                        title: 'Enrollment Failed',
+                        message,
+                        timestamp: Date.now(),
+                    });
+                }
             });
     },
 });
 
 export const { dismissNotification, clearAllNotifications, resetStatus } = enrollmentSlice.actions;
-
-// ─── Selectors ────────────────────────────────────────────────────────────────
 
 export const selectEnrollmentStatus = (state: RootState) => state.enrollment.status;
 export const selectEnrollmentError = (state: RootState) => state.enrollment.error;

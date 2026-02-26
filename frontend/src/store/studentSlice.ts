@@ -3,8 +3,6 @@ import type { RootState } from './index';
 import { getStudentHistory } from '../api/studentService';
 import { StudentCourseHistory } from '../types/student';
 
-// ─── State ────────────────────────────────────────────────────────────────────
-
 type HistoryStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
 
 interface StudentState {
@@ -19,8 +17,6 @@ const initialState: StudentState = {
     historyError: null,
 };
 
-// ─── Async Thunk ──────────────────────────────────────────────────────────────
-
 export const fetchStudentHistory = createAsyncThunk(
     'student/fetchHistory',
     async (studentId: number, { rejectWithValue }) => {
@@ -33,8 +29,6 @@ export const fetchStudentHistory = createAsyncThunk(
         }
     }
 );
-
-// ─── Slice ────────────────────────────────────────────────────────────────────
 
 export const studentSlice = createSlice({
     name: 'student',
@@ -56,8 +50,6 @@ export const studentSlice = createSlice({
             });
     },
 });
-
-// ─── Selectors ────────────────────────────────────────────────────────────────
 
 export const selectStudentHistory = (state: RootState): StudentCourseHistory =>
     state.student.history ?? { completedCourseIds: [], activeCourseIds: [], allEnrollments: [] };

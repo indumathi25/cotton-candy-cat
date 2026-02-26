@@ -6,20 +6,24 @@ import { getEnrollmentBlockMessage } from '../../../utils/enrollmentValidation';
 interface CourseCardProps {
     course: CourseWithEnrollmentStatus;
     onEnroll: (courseId: number) => Promise<void> | void;
-    isEnrolling?: boolean; // Controlled by Redux enrollment thunk
+    isEnrolling?: boolean;
 }
 
 export const CourseCard: React.FC<CourseCardProps> = ({ course, onEnroll, isEnrolling: externalIsEnrolling }) => {
     const [localIsEnrolling, setLocalIsEnrolling] = useState(false);
-    // Use Redux-controlled state if provided, otherwise fall back to local state
+    const inFlightRef = React.useRef(false);
     const isEnrolling = externalIsEnrolling ?? localIsEnrolling;
 
     const handleEnrollClick = async () => {
+        if (isEnrolling || inFlightRef.current) return;
+
+        inFlightRef.current = true;
         setLocalIsEnrolling(true);
         try {
             await onEnroll(course.id);
         } finally {
             setLocalIsEnrolling(false);
+            inFlightRef.current = false;
         }
     };
 

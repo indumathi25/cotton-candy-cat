@@ -16,6 +16,7 @@ public class AdminServiceImpl implements AdminService {
     private final TeacherRepository teacherRepository;
     private final ClassroomRepository classroomRepository;
     private final SpecializationRepository specializationRepository;
+    private final com.maplewood.mapper.AdminMapper adminMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -33,15 +34,14 @@ public class AdminServiceImpl implements AdminService {
         // Calculate students per grade (assuming 4 grades: 9-12)
         int studentsPerGrade = totalStudents > 0 ? (int) (totalStudents / 4) : 0;
 
-        return AdminStatsDTO.builder()
-                .totalStudents((int) totalStudents)
-                .totalCourses((int) totalCourses)
-                .totalTeachers((int) totalTeachers)
-                .totalClassrooms((int) totalClassrooms)
-                .studentsPerGrade(studentsPerGrade)
-                .coreCoursesCount((int) coreCoursesCount)
-                .electiveCoursesCount((int) electiveCoursesCount)
-                .specializationsCount((int) specializationsCount)
-                .build();
+        return adminMapper.toStatsDTO(
+                (int) totalStudents,
+                (int) totalCourses,
+                (int) totalTeachers,
+                (int) totalClassrooms,
+                studentsPerGrade,
+                (int) coreCoursesCount,
+                (int) electiveCoursesCount,
+                (int) specializationsCount);
     }
 }

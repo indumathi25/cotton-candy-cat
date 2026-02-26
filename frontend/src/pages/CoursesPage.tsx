@@ -10,6 +10,7 @@ import {
     selectEnrollmentStatus,
     selectNotifications,
     dismissNotification,
+    selectPendingSections,
 } from '../store/enrollmentSlice';
 import {
     fetchStudentHistory,
@@ -17,6 +18,8 @@ import {
 } from '../store/studentSlice';
 import { LoadingSkeleton } from '../components/common';
 import { useStudentProfile } from '../hooks/useStudentData';
+import { useCourses } from '../hooks/useCourseData';
+import { enrichCoursesWithEnrollmentStatus } from '../utils/enrollmentValidation';
 import { AppDispatch } from '../store';
 
 export const CoursesPage: React.FC = () => {
@@ -25,19 +28,35 @@ export const CoursesPage: React.FC = () => {
 
     const user = useSelector(selectUser);
     const selectedGrade = useSelector(selectSelectedGrade);
-    const enrollStatus = useSelector(selectEnrollmentStatus);
     const notifications = useSelector(selectNotifications);
+    const pendingSections = useSelector(selectPendingSections);
     const studentCourseHistory = useSelector(selectStudentHistory);
     const studentId = user?.studentId || 101;
 
     const { data: profile, isLoading: profileLoading } = useStudentProfile(studentId);
 
-    // ── Fetch course history into Redux on mount ───────────────────────────
+    // Fetch courses at the top level
+    const {
+        data: coursesResponse,
+        isLoading: coursesLoading,
+        isError: coursesError,
+        refetch: refetchCourses,
+    } = useCourses(selectedGrade || undefined, 0, 50);
+
+    // Enrich courses with enrollment status
+    // React Compiler will memoize this automatically
+    const enrichedCourses = coursesResponse?.content
+        ? enrichCoursesWithEnrollmentStatus(
+            coursesResponse.content,
+            profile?.gradeLevel || 9,
+            studentCourseHistory
+        )
+        : [];
+
     useEffect(() => {
         dispatch(fetchStudentHistory(studentId));
     }, [dispatch, studentId]);
 
-    // ── Single dispatch — thunk owns the entire operation ──────────────────
     const handleEnroll = async (courseId: number) => {
         if (!user?.studentId) return;
 
@@ -87,12 +106,15 @@ export const CoursesPage: React.FC = () => {
             )}
 
             <CourseBrowser
+                courses={enrichedCourses}
+                isLoading={coursesLoading}
+                isError={coursesError}
+                onRetry={refetchCourses}
                 selectedGrade={selectedGrade}
                 onGradeChange={(grade) => dispatch(setSelectedGrade(grade))}
-                courseHistory={studentCourseHistory}
-                onEnroll={handleEnroll}
                 studentGradeLevel={profile?.gradeLevel || 9}
-                isEnrolling={enrollStatus === 'loading'}
+                onEnroll={handleEnroll}
+                pendingCourseIds={pendingSections}
             />
         </StudentLayout>
     );

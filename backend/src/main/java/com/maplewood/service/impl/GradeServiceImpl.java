@@ -20,6 +20,7 @@ public class GradeServiceImpl implements GradeService {
 
     private final StudentRepository studentRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final com.maplewood.mapper.GradeMapper gradeMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -30,7 +31,7 @@ public class GradeServiceImpl implements GradeService {
         List<Enrollment> enrollments = enrollmentRepository.findByStudentId(studentId);
 
         List<CourseGradeDTO> courseGrades = enrollments.stream()
-                .map(this::mapToCourseGradeDTO)
+                .map(gradeMapper::toCourseGradeDTO)
                 .collect(Collectors.toList());
 
         // Calculate GPA
@@ -43,7 +44,7 @@ public class GradeServiceImpl implements GradeService {
 
         int creditsAttempted = enrollments.size();
 
-        return new GradeReportDTO(
+        return gradeMapper.toGradeReportDTO(
                 student.getId(),
                 student.getFirstName() + " " + student.getLastName(),
                 student.getGradeLevel(),
@@ -51,25 +52,6 @@ public class GradeServiceImpl implements GradeService {
                 creditsEarned,
                 creditsAttempted,
                 courseGrades);
-    }
-
-    private CourseGradeDTO mapToCourseGradeDTO(Enrollment enrollment) {
-        var section = enrollment.getCourseSection();
-        var course = section.getCourse();
-        var teacher = section.getTeacher();
-        var semester = section.getSemester();
-
-        String status = enrollment.getGrade() != null ? "completed" : "enrolled";
-
-        return new CourseGradeDTO(
-                enrollment.getId(),
-                course.getCode(),
-                course.getName(),
-                teacher.getFirstName() + " " + teacher.getLastName(),
-                semester.getName(),
-                enrollment.getGrade(),
-                1.0, // Each course is 1 credit
-                status);
     }
 
     private double calculateGPA(List<Enrollment> enrollments) {

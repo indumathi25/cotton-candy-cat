@@ -12,7 +12,6 @@ import authReducer from '../store/authSlice';
 import studentReducer from '../store/studentSlice';
 import type { UserRole } from '../types/auth';
 
-// ─── Mock all API calls ────────────────────────────────────────────────────────
 vi.mock('../api/courseService', () => ({
     getCourses: vi.fn(),
     getCourseSections: vi.fn(),
@@ -26,7 +25,6 @@ vi.mock('../api/studentService', () => ({
     getGradeReport: vi.fn(),
 }));
 
-// ─── Mock layout components ───────────────────────────────────────────────────
 vi.mock('../components/layouts/StudentLayout', () => ({
     StudentLayout: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-testid="student-layout">
@@ -42,31 +40,31 @@ vi.mock('../components/common', async () => ({
     ErrorMessage: ({ message }: { message: string }) => <p>{message}</p>,
 }));
 
-// ─── Mock CourseBrowser — we test the page's Redux wiring, not the full tree ──
 // The real CourseBrowser relies on enrichCoursesWithEnrollmentStatus
 // which crashes without a full data shape. We stub it with a simple enroll button.
 vi.mock('../components/features/courses/CourseBrowser', () => ({
     CourseBrowser: ({
         onEnroll,
-        isEnrolling,
+        isLoading,
+        pendingCourseIds = [],
     }: {
         onEnroll: (id: number) => void;
-        isEnrolling?: boolean;
-        selectedGrade: number | null;
-        onGradeChange: (g: number | null) => void;
-        courseHistory: unknown;
-        studentGradeLevel: number;
-    }) => (
-        <div data-testid="course-browser">
-            <button
-                onClick={() => onEnroll(1)}
-                disabled={isEnrolling}
-                aria-label="Enroll in course 1"
-            >
-                {isEnrolling ? 'Enrolling...' : 'Enroll in Algebra 1'}
-            </button>
-        </div>
-    ),
+        isLoading?: boolean;
+        pendingCourseIds?: number[];
+    }) => {
+        const isEnrolling = pendingCourseIds.includes(1);
+        return (
+            <div data-testid="course-browser">
+                <button
+                    onClick={() => onEnroll(1)}
+                    disabled={isLoading || isEnrolling}
+                    aria-label="Enroll in course 1"
+                >
+                    {isEnrolling ? 'Enrolling...' : 'Enroll in Algebra 1'}
+                </button>
+            </div>
+        );
+    },
 }));
 
 // ─── Imports after mocks ──────────────────────────────────────────────────────
@@ -78,7 +76,6 @@ const mockEnrollInCourse = vi.mocked(enrollInCourse);
 const mockGetStudentProfile = vi.mocked(getStudentProfile);
 const mockGetStudentHistory = vi.mocked(getStudentHistory);
 
-// ─── Test Fixtures ────────────────────────────────────────────────────────────
 const mockProfile = {
     id: 101, fullName: 'Emma Wilson', gradeLevel: 10,
     gpa: 3.8, creditsEarned: 20, creditsToGraduate: 30,
@@ -87,7 +84,6 @@ const mockProfile = {
 const mockHistory = { completedCourseIds: [5], activeCourseIds: [], allEnrollments: [] };
 const mockSection = { id: 99, capacity: 30, timeSlot: { dayOfWeek: 'Monday', startTime: '09:00', endTime: '10:00' } } as never;
 
-// ─── Render Helper ────────────────────────────────────────────────────────────
 const renderPage = () => {
     const store = configureStore({
         reducer: { auth: authReducer, enrollment: enrollmentReducer, ui: uiReducer, student: studentReducer },
@@ -116,7 +112,6 @@ const renderPage = () => {
     return { store };
 };
 
-// ─── Tests ────────────────────────────────────────────────────────────────────
 describe('CoursesPage — integration tests', () => {
     beforeEach(() => {
         vi.clearAllMocks();

@@ -9,7 +9,7 @@ This system provides course enrollment management and academic tracking for high
 ## Technology Stack
 
 **Backend**
-- Spring Boot 3.x (Java 17)
+- Spring Boot 4.0.3 (Java 25)
 - SQLite with Hibernate ORM
 - Spring Security (HTTP Basic Auth + BCrypt)
 - Spring Validation (Jakarta Bean Validation)
@@ -32,7 +32,7 @@ This system provides course enrollment management and academic tracking for high
 
 ## Prerequisites
 
-- Java 17+
+- Java 25+
 - Node.js 20+ (Required for Vite 7)
 - Maven 3.8+
 - Python 3 (for database setup)
@@ -151,7 +151,7 @@ See [**ARCHITECTURE_DECISIONS.md**](./ARCHITECTURE_DECISIONS.md) for details on:
 
 ## Best Practices
 
-- **Advanced DSA**: Prerequisite logic modeled as a DAG with Topological Sorting & Cycle Detection
+- **Advanced DSA**: Prerequisite logic modeled as a DAG with Kahn's Algorithm (Topological Sorting & Cycle Detection)
 - **React Compiler**: Automatic memoization via React 19 Compiler (no manual `useMemo`/`useCallback`)
 - **Input Sanitization**: DOMPurify (frontend XSS prevention) + Jakarta Validation (`@Valid`) on all DTOs
 - **Transaction Management**: All write operations use `@Transactional` for ACID guarantees

@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mapstruct.factory.Mappers;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +32,8 @@ class StudentMapperTest {
 
     @BeforeEach
     void setUp() {
-        studentMapper = new StudentMapper(academicCalculator);
+        studentMapper = Mappers.getMapper(StudentMapper.class);
+        ReflectionTestUtils.setField(studentMapper, "academicCalculator", academicCalculator);
     }
 
     @Test

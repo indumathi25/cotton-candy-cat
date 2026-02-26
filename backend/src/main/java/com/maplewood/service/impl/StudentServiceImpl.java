@@ -71,14 +71,11 @@ public class StudentServiceImpl implements StudentService {
 
                 // Merge history and active enrollments into DTOs
                 List<StudentEnrollmentDTO> allEnrollments = Stream.concat(
-                                history.stream().map(ch -> mapToEnrollmentDTO(ch, ch.getStatus().name().toLowerCase())),
-                                enrollments.stream().map(e -> mapToEnrollmentDTO(e, "active"))).toList();
+                                history.stream().map(ch -> studentMapper.toEnrollmentDTO(ch,
+                                                ch.getStatus().name().toLowerCase())),
+                                enrollments.stream().map(e -> studentMapper.toEnrollmentDTO(e, "active"))).toList();
 
-                return StudentCourseHistoryDTO.builder()
-                                .completedCourseIds(completedIds)
-                                .activeCourseIds(activeIds)
-                                .allEnrollments(allEnrollments)
-                                .build();
+                return studentMapper.toHistoryDTO(completedIds, activeIds, allEnrollments);
         }
 
         // ---------------------- Private helpers ----------------------
@@ -99,32 +96,5 @@ public class StudentServiceImpl implements StudentService {
                                 .filter(ch -> status.equals(ch.getStatus()))
                                 .map(ch -> ch.getCourse().getId())
                                 .toList();
-        }
-
-        private StudentEnrollmentDTO mapToEnrollmentDTO(CourseHistory ch, String status) {
-                return StudentEnrollmentDTO.builder()
-                                .courseId(ch.getCourse().getId())
-                                .courseName(ch.getCourse().getName())
-                                .courseCode(ch.getCourse().getCode())
-                                .semesterOrder(ch.getSemester().getOrderInYear())
-                                .grade(ch.getGrade())
-                                .credits(ch.getCourse().getCredits())
-                                .status(status)
-                                .build();
-        }
-
-        private StudentEnrollmentDTO mapToEnrollmentDTO(Enrollment e, String status) {
-                CourseSection cs = e.getCourseSection();
-                Course course = cs.getCourse();
-                Semester semester = cs.getSemester();
-
-                return StudentEnrollmentDTO.builder()
-                                .courseId(course.getId())
-                                .courseName(course.getName())
-                                .courseCode(course.getCode())
-                                .semesterOrder(semester.getOrderInYear())
-                                .credits(course.getCredits())
-                                .status(status)
-                                .build();
         }
 }

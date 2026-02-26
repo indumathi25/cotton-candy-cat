@@ -2,25 +2,16 @@ package com.maplewood.mapper;
 
 import com.maplewood.dto.CourseSectionDto;
 import com.maplewood.model.CourseSection;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class CourseSectionMapper {
+@Mapper(componentModel = "spring")
+public interface CourseSectionMapper {
 
-    public CourseSectionDto toDto(CourseSection section, Long enrolledCount) {
-        if (section == null) {
-            return null;
-        }
-
-        return CourseSectionDto.builder()
-                .id(section.getId())
-                .teacherName(section.getTeacher().getFirstName() + " " + section.getTeacher().getLastName())
-                .dayOfWeek(section.getTimeSlot().getDayOfWeek())
-                .startTime(section.getTimeSlot().getStartTime())
-                .endTime(section.getTimeSlot().getEndTime())
-                .classroomId(section.getClassroomId())
-                .capacity(section.getCapacity())
-                .enrolledCount(enrolledCount)
-                .build();
-    }
+    @Mapping(target = "teacherName", expression = "java(section.getTeacher().getFirstName() + \" \" + section.getTeacher().getLastName())")
+    @Mapping(target = "dayOfWeek", source = "section.timeSlot.dayOfWeek")
+    @Mapping(target = "startTime", source = "section.timeSlot.startTime")
+    @Mapping(target = "endTime", source = "section.timeSlot.endTime")
+    @Mapping(target = "enrolledCount", source = "enrolledCount")
+    CourseSectionDto toDto(CourseSection section, Long enrolledCount);
 }

@@ -7,7 +7,6 @@ import com.maplewood.service.CourseService;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,22 +22,20 @@ public class CourseController {
      * Get paginated list of courses (optionally filtered by grade)
      */
     @GetMapping
-    public ResponseEntity<PageResponse<CourseDto>> getCourses(
+    public PageResponse<CourseDto> getCourses(
             @RequestParam(required = false) @Min(1) Integer grade,
             Pageable pageable) {
 
-        PageResponse<CourseDto> response = PageResponse.of(courseService.getCourses(grade, pageable));
-
-        return ResponseEntity.ok(response);
+        return PageResponse.of(courseService.getCourses(grade, pageable));
     }
 
     /**
      * Get all sections for a given course
      */
     @GetMapping("/{courseId}/sections")
-    public ResponseEntity<List<CourseSectionDto>> getCourseSections(
+    public List<CourseSectionDto> getCourseSections(
             @PathVariable @Min(1) Long courseId) {
 
-        return ResponseEntity.ok(courseService.getCourseSections(courseId));
+        return courseService.getCourseSections(courseId);
     }
 }

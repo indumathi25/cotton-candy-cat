@@ -9,7 +9,7 @@ interface CourseListProps {
     isError: boolean;
     onEnroll: (courseId: number) => void;
     onRetry?: () => void;
-    isEnrolling?: boolean;
+    pendingCourseIds?: number[];
 }
 
 export const CourseList: React.FC<CourseListProps> = ({
@@ -18,7 +18,7 @@ export const CourseList: React.FC<CourseListProps> = ({
     isError,
     onEnroll,
     onRetry,
-    isEnrolling = false,
+    pendingCourseIds = [],
 }) => {
     if (isLoading) {
         return (
@@ -58,7 +58,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                     key={course.id}
                     course={course}
                     onEnroll={onEnroll}
-                    isEnrolling={isEnrolling}
+                    isEnrolling={pendingCourseIds.includes(course.id)}
                 />
             ))}
         </div>
