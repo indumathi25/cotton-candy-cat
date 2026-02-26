@@ -7,7 +7,6 @@ import { selectUser } from '../store/authSlice';
 import { setSelectedGrade, selectSelectedGrade } from '../store/uiSlice';
 import {
     enrollStudent,
-    selectEnrollmentStatus,
     selectNotifications,
     dismissNotification,
     selectPendingSections,
