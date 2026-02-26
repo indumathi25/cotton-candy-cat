@@ -11,12 +11,12 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -51,7 +51,6 @@ public class SecurityIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "student", roles = { "STUDENT" })
     void testEnrollEndpoint_AuthenticatedStudent_Returns200() throws Exception {
         EnrollmentRequestDTO request = new EnrollmentRequestDTO(1L, 1L);
         EnrollmentResponseDTO response = new EnrollmentResponseDTO();
@@ -60,17 +59,17 @@ public class SecurityIntegrationTest {
         when(enrollmentService.enrollStudent(any(EnrollmentRequestDTO.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/enrollments")
-                .with(csrf()) // Just in case, though it's disabled
+                .with(user("student").roles("STUDENT"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = { "ADMIN" })
     void testEnrollEndpoint_AuthenticatedAdmin_UsingAPI_Returns403() throws Exception {
         EnrollmentRequestDTO request = new EnrollmentRequestDTO(1L, 1L);
         mockMvc.perform(post("/api/enrollments")
+                .with(user("admin").roles("ADMIN"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden())
@@ -80,10 +79,10 @@ public class SecurityIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "student", roles = { "STUDENT" })
     void testEnrollEndpoint_InvalidInput_Returns400() throws Exception {
         EnrollmentRequestDTO request = new EnrollmentRequestDTO(-1L, 1L); // Invalid Student ID
         mockMvc.perform(post("/api/enrollments")
+                .with(user("student").roles("STUDENT"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());

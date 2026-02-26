@@ -18,15 +18,21 @@ public abstract class StudentMapper {
         @Autowired
         protected AcademicCalculator academicCalculator;
 
+        public StudentProfileDTO toProfileDTO(Student student, List<CourseHistory> passedCourses,
+                        int creditsToGraduate, double gpa) {
+                int creditsEarned = academicCalculator.calculateCreditsEarned(passedCourses);
+                return toProfileDTOInternal(student, creditsEarned, creditsToGraduate, gpa);
+        }
+
         @Mapping(target = "id", source = "student.id")
         @Mapping(target = "fullName", expression = "java(student.getFirstName() + \" \" + student.getLastName())")
         @Mapping(target = "gradeLevel", source = "student.gradeLevel")
         @Mapping(target = "gpa", source = "gpa")
-        @Mapping(target = "creditsEarned", expression = "java(academicCalculator.calculateCreditsEarned(passedCourses))")
+        @Mapping(target = "creditsEarned", source = "creditsEarned")
         @Mapping(target = "creditsToGraduate", source = "creditsToGraduate")
-        @Mapping(target = "remainingCredits", expression = "java(academicCalculator.calculateRemainingCredits(creditsToGraduate, academicCalculator.calculateCreditsEarned(passedCourses)))")
-        @Mapping(target = "progressPercentage", expression = "java(academicCalculator.calculateProgress(creditsToGraduate, academicCalculator.calculateCreditsEarned(passedCourses)))")
-        public abstract StudentProfileDTO toProfileDTO(Student student, List<CourseHistory> passedCourses,
+        @Mapping(target = "remainingCredits", expression = "java(academicCalculator.calculateRemainingCredits(creditsToGraduate, creditsEarned))")
+        @Mapping(target = "progressPercentage", expression = "java(academicCalculator.calculateProgress(creditsToGraduate, creditsEarned))")
+        protected abstract StudentProfileDTO toProfileDTOInternal(Student student, int creditsEarned,
                         int creditsToGraduate, double gpa);
 
         @Mapping(target = "studentId", source = "student.id")
