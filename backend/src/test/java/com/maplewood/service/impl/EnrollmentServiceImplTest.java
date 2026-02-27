@@ -40,9 +40,7 @@ public class EnrollmentServiceImplTest {
         @InjectMocks
         private EnrollmentServiceImpl enrollmentService;
 
-        @org.springframework.lang.NonNull
         private Student student = new Student();
-        @org.springframework.lang.NonNull
         private CourseSection section = new CourseSection();
         private Semester activeSemester;
         private EnrollmentRequestDTO request;
