@@ -10,6 +10,12 @@ import { BrowserRouter } from 'react-router-dom';
 import { setAuthCredentials } from './api/client';
 import toast, { Toaster } from 'react-hot-toast';
 
+// Initial sync of credentials from rehydrated state to avoid race conditions on page refresh
+const initialState = store.getState();
+if (initialState.auth.credentials) {
+  setAuthCredentials(initialState.auth.credentials.username, initialState.auth.credentials.password);
+}
+
 store.subscribe(() => {
   const state = store.getState();
   if (state.auth.credentials) {

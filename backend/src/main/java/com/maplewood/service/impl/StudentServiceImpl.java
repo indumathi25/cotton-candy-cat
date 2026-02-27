@@ -10,10 +10,7 @@ import com.maplewood.util.AcademicCalculator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 @Service
@@ -57,7 +54,7 @@ public class StudentServiceImpl implements StudentService {
 
         @Override
         public StudentCourseHistoryDTO getStudentCourseHistory(Long studentId) {
-                Student student = fetchStudent(studentId);
+                fetchStudent(studentId);
                 Semester activeSemester = fetchActiveSemester();
 
                 List<CourseHistory> history = courseHistoryRepository.findByStudentId(studentId);

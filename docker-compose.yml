@@ -7,24 +7,56 @@ services:
     container_name: maplewood-backend
     ports:
       - "8080:8080"
-    volumes:
-      - ./database:/app/database
     env_file:
       - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:sqlite:database/maplewood_school.sqlite?journal_mode=WAL&busy_timeout=5000
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/maplewood
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
       - STUDENT_USERNAME=${STUDENT_USERNAME}
       - STUDENT_PASSWORD=${STUDENT_PASSWORD}
       - ADMIN_USERNAME=${ADMIN_USERNAME}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     networks:
       - maplewood-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
     healthcheck:
       test: [ "CMD", "curl", "-f", "-u", "admin:admin", "http://localhost:8080/api/courses?size=1" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: maplewood-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=maplewood
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - maplewood-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d maplewood" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   frontend:
@@ -51,3 +83,6 @@ services:
 networks:
   maplewood-network:
     driver: bridge
+
+volumes:
+  postgres_data:

@@ -31,19 +31,29 @@ The system manages complex academic dependencies using advanced graph theory con
 
 ### Prerequisite Management as a DAG
 - **Directed Acyclic Graph (DAG)**: Course prerequisites are modeled as a DAG within the `PrerequisiteGraph` component.
-- **Topological Sorting (DFS-based)**:
-    - Implemented a Depth-First Search algorithm with **Cycle Detection** to generate valid graduation paths.
-    - Ensures that no circular dependencies (e.g., A requires B, and B requires A) can exist in the curriculum.
+- **Topological Sorting (Kahn's Algorithm)**:
+    - Used to detect circular dependencies at startup and generate valid graduation paths.
+    - Ensures no circular chains can bypass the enrollment guard.
+- **Startup-Cached Deep Prerequisites** *(Performance Optimization)*:
+    - `PrerequisiteGraphInitializer` listens for `ApplicationReadyEvent` and calls `buildGraph()` exactly once after data seeding completes.
+    - During `buildGraph()`, `computeDeepPrerequisites()` is called for every course, and results are stored in a `deepPrerequisitesCache: Map<Long, List<Course>>`.
+    - Enrollment validation calls `getDeepPrerequisites(courseId)` → **pure `Map.get()` lookup, O(1)**. Zero graph traversal at runtime.
+- **Batch DB Query for Verification**:
+    - Instead of N individual queries (one per prerequisite), a single JPQL query fetches all of the student's `passed` course IDs.
+    - Verification is done in-memory via `Set<Long>` for **O(1) per check**.
 - **Impact Analysis (BFS/Transitive Property)**:
-    - **Downstream Impact**: Uses a Breadth-First Search (BFS) approach to identify all future courses that would be blocked if a student fails a specific prerequisite.
-    - **Deep Prerequisite Traversal**: Provides O(N) transitive lookup to verify that students have completed all courses in a specific chain (e.g., Calc 1 -> Calc 2 -> Physics).
+    - **Downstream Impact**: Uses BFS to identify all future courses blocked by a failure.
+
+### Academic Metrics Calculation
+- **GPA Calculation Engine**: Implemented a weighted GPA calculation logic in `AcademicCalculator`. It accounts for course credits and assigned letter grades (A-F), converting them to a 4.0 scale.
+- **Progress Tracking**: Dynamically calculates "Credits Earned" vs. "Credits to Graduate," providing a real-time progress percentage for student degree completion.
 
 ---
 
-## ⚙️ 3. Backend Architecture (Spring Boot)
+## ⚙️ 3. Backend Architecture (Spring Boot 4.0)
 
 ### Security & Data Protection
-- **Spring Security 6.x**: Implemented a stateless security architecture.
+- **Spring Security 7.x**: Implemented a stateless security architecture for the next-gen Spring framework.
     - **Authentication**: HTTP Basic Auth with **BCrypt** password hashing (Strongest standard for password storage).
     - **CORS Management**: Strict origin filtering restricted to the React frontend.
     - **Security Headers**: Hardened with **XSS Protection**, **Content Security Policy (CSP)**, **HSTS**, and **Frame Options (DENY)** to prevent clickjacking and injection attacks.
@@ -51,11 +61,15 @@ The system manages complex academic dependencies using advanced graph theory con
 - **Role-Based Access Control (RBAC)**: Endpoints are secured based on user roles (`STUDENT`, `ADMIN`) using `authorizeHttpRequests`.
 
 ### Language Features & Data Persistence
-- **Java 17/21 Features**: Leverages modern Java features including `records` (for DTOs), `LocalDateTime`, and the `Jakarta Persistence` (JPA) specification.
+- **Java 25 Features**: Leverages modern Java features including `records` (for DTOs), `LocalDateTime`, and the `Jakarta Persistence` (JPA) specification.
+- **JSpecify Null Safety**: Migrated from the deprecated `org.springframework.lang.NonNull` to **`org.jspecify.annotations.NonNull`** (the Spring 7.0 / Java 25 standard for null-safety annotations), backed by `org.jspecify:jspecify:1.0.0`.
+- **Database**: Exclusively uses **PostgreSQL 17** via Spring Data JPA / Hibernate. SQLite has been fully removed. The `DataInitializer` (`CommandLineRunner`) auto-seeds the database on first run.
 - **Transaction Management**: Used `@Transactional` at the service layer to ensure **ACID** properties. For instance, the enrollment process is atomic; if the database save fails, all pre-validations are rolled back.
 - **Performance Indexing**: Database performance is optimized via JPA-level indexing.
-    - *Example*: The `Student` entity includes `@Index` on the `email` column to ensure O(1) lookups during login.
-- **Clean Service Layer**: Implemented a "Fetch -> Validate -> Save" pattern, delegating complex business rules to dedicated `Validator` components for high maintainability.
+    - *Example*: The `Student` entity includes `@Index` on the `email` column to ensure fast lookups.
+- **Clean Service Layer**: Implemented a "Fetch → Validate → Save" pattern, delegating complex business rules to dedicated `Validator` components for high maintainability.
+- **Decoupled Mapping (MapStruct)**: Utilizes **MapStruct** to strictly separate persistence models (Entities) from API contracts (DTOs).
+- **Dedicated Academic Logic**: Academic calculations (GPA, Credits) are encapsulated in the `AcademicCalculator` utility, ensuring the service layer remains focused on orchestration.
 
 ---
 
@@ -93,4 +107,4 @@ The system manages complex academic dependencies using advanced graph theory con
   - Integrate **Snyk** or **OWASP Dependency-Check** in the CI/CD pipeline to flag vulnerable libraries.
 
 ---
-*Last Updated: February 2026*
+*Last Updated: February 2026 (Updated with Java 25, Spring Boot 4.0, PostgreSQL, JSpecify null-safety, and startup-cached DAG prerequisite optimization)*

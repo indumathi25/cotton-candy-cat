@@ -94,7 +94,7 @@ const renderPage = () => {
                 isAuthenticated: true,
             },
             enrollment: { pendingSections: [], enrolledSectionIds: [], status: 'idle' as const, error: null, notifications: [] },
-            ui: { courseFilter: { selectedGrade: null, searchTerm: '', currentPage: 0, pageSize: 20 }, scheduleViewMode: 'grid' as const, sidebarOpen: false },
+            ui: { courseFilter: { selectedGrade: null, searchTerm: '', currentPage: 0, pageSize: 20 } },
             student: { history: mockHistory, historyStatus: 'succeeded' as const, historyError: null },
         },
     });

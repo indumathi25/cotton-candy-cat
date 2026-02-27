@@ -19,7 +19,7 @@ export const StudentProfilePage: React.FC = () => {
     }
 
     const completedEnrollments = history?.allEnrollments?.filter(
-        e => e.status === 'completed' || e.status === 'dropped'
+        e => e.status === 'passed' || e.status === 'failed' || e.status === 'dropped'
     ) || [];
 
     return (

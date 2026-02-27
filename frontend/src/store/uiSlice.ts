@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from './index';
 
-export type ScheduleViewMode = 'grid' | 'list';
 
 interface UIState {
     courseFilter: {
@@ -10,8 +9,6 @@ interface UIState {
         currentPage: number;
         pageSize: number;
     };
-    scheduleViewMode: ScheduleViewMode;
-    sidebarOpen: boolean;
 }
 
 const initialState: UIState = {
@@ -21,8 +18,6 @@ const initialState: UIState = {
         currentPage: 0,
         pageSize: 20,
     },
-    scheduleViewMode: 'grid',
-    sidebarOpen: false,
 };
 
 export const uiSlice = createSlice({
@@ -44,19 +39,6 @@ export const uiSlice = createSlice({
         resetCourseFilters: (state) => {
             state.courseFilter = initialState.courseFilter;
         },
-
-        // Schedule view
-        setScheduleViewMode: (state, action: PayloadAction<ScheduleViewMode>) => {
-            state.scheduleViewMode = action.payload;
-        },
-
-        // Sidebar
-        toggleSidebar: (state) => {
-            state.sidebarOpen = !state.sidebarOpen;
-        },
-        setSidebarOpen: (state, action: PayloadAction<boolean>) => {
-            state.sidebarOpen = action.payload;
-        },
     },
 });
 
@@ -65,16 +47,11 @@ export const {
     setSearchTerm,
     setCurrentPage,
     resetCourseFilters,
-    setScheduleViewMode,
-    toggleSidebar,
-    setSidebarOpen,
 } = uiSlice.actions;
 
 export const selectCourseFilter = (state: RootState) => state.ui.courseFilter;
 export const selectSelectedGrade = (state: RootState) => state.ui.courseFilter.selectedGrade;
 export const selectSearchTerm = (state: RootState) => state.ui.courseFilter.searchTerm;
 export const selectCurrentPage = (state: RootState) => state.ui.courseFilter.currentPage;
-export const selectScheduleViewMode = (state: RootState) => state.ui.scheduleViewMode;
-export const selectSidebarOpen = (state: RootState) => state.ui.sidebarOpen;
 
 export default uiSlice.reducer;

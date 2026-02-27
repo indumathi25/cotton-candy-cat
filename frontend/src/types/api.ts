@@ -60,7 +60,7 @@ export interface StudentEnrollmentDTO {
     semesterOrder: number;
     grade?: string;
     credits: number;
-    status: string; // 'active', 'completed', 'dropped'
+    status: string; // 'active', 'passed', 'failed', 'dropped', 'completed'
 }
 
 export interface StudentCourseHistory {

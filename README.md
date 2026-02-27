@@ -10,9 +10,12 @@ This system provides course enrollment management and academic tracking for high
 
 **Backend**
 - Spring Boot 4.0.3 (Java 25)
-- SQLite with Hibernate ORM
-- Spring Security (HTTP Basic Auth + BCrypt)
+- PostgreSQL 17 with Hibernate ORM (JPA)
+- Spring Security 7.x (HTTP Basic Auth + BCrypt)
 - Spring Validation (Jakarta Bean Validation)
+- MapStruct (Entity ↔ DTO mapping)
+- Lombok (Boilerplate reduction)
+- JSpecify (Null-safety annotations)
 - Maven
 
 **Frontend**
@@ -32,24 +35,12 @@ This system provides course enrollment management and academic tracking for high
 
 ## Prerequisites
 
-- Java 25+
-- Node.js 20+ (Required for Vite 7)
-- Maven 3.8+
-- Python 3 (for database setup)
 - Docker & Docker Compose
+- Node.js 20+ (for local frontend development only)
 
 ## Getting Started
 
-### 1. Setup Database
-
-```bash
-# From project root
-python3 database/populate_database.py
-```
-
-> **Note**: Creates `maplewood_school.sqlite` in the `database/` directory. Docker Compose automatically mounts it.
-
-### 2. Configure Environment Variables
+### 1. Configure Environment Variables
 
 ```bash
 cp .env.example .env
@@ -57,12 +48,14 @@ cp .env.example .env
 
 The default values are pre-configured for local Docker development.
 
-### 3. Run with Docker (Recommended)
+### 2. Run with Docker (Recommended)
 
 ```bash
 make build
 make up
 ```
+
+> **Note**: On first startup, the `DataInitializer` automatically seeds the PostgreSQL database with realistic sample data (students, courses, teachers, schedules). No manual setup required.
 
 - Frontend: `http://localhost:3000`
 - Backend API: `http://localhost:8080`
@@ -121,12 +114,19 @@ cotton-candy-cat/
 │   └── deploy.yml          # Manual deploy to AWS EC2
 ├── backend/                # Spring Boot API
 │   └── src/main/java/com/maplewood/
+│       ├── config/         # Security, DataInitializer, PrerequisiteGraphInitializer
+│       ├── controller/     # REST controllers
+│       ├── service/        # Business logic + EnrollmentValidator
+│       ├── repository/     # Spring Data JPA repos
+│       ├── model/          # JPA entities
+│       ├── dto/            # API contracts
+│       ├── mapper/         # MapStruct mappers
+│       └── util/           # PrerequisiteGraph (DAG)
 ├── frontend/               # React App (Vite + TypeScript)
 │   └── src/
 ├── infrastructure/
 │   ├── terraform/          # AWS EC2 provisioning
 │   └── ansible/            # Server configuration & deployment
-├── database/               # SQLite database & seed script
 ├── docker-compose.yml
 ├── Makefile
 ├── enrollment-sequence-diagram.png  # Enrollment flow diagram
@@ -151,7 +151,10 @@ See [**ARCHITECTURE_DECISIONS.md**](./ARCHITECTURE_DECISIONS.md) for details on:
 
 ## Best Practices
 
-- **Advanced DSA**: Prerequisite logic modeled as a DAG with Kahn's Algorithm (Topological Sorting & Cycle Detection)
+- **Startup-Cached DAG**: Prerequisite graph is built once at startup via `ApplicationReadyEvent`, then queried in O(1) during every enrollment
+- **Batch DB Queries**: Student history is fetched in a single query and verified in-memory using `Set<Long>` lookups
+- **JSpecify Null Safety**: Uses `org.jspecify.annotations.NonNull` (Spring 7.0 standard) instead of deprecated Spring annotations
+- **Auto Data Seeding**: `DataInitializer` seeds the PostgreSQL database on first boot — no manual setup needed
 - **React Compiler**: Automatic memoization via React 19 Compiler (no manual `useMemo`/`useCallback`)
 - **Input Sanitization**: DOMPurify (frontend XSS prevention) + Jakarta Validation (`@Valid`) on all DTOs
 - **Transaction Management**: All write operations use `@Transactional` for ACID guarantees

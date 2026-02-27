@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CourseService {
 
-    Page<CourseDto> getCourses(Integer grade, Pageable pageable);
+    Page<CourseDto> getCourses(Integer grade, String search, Pageable pageable);
 
     List<CourseSectionDto> getCourseSections(Long courseId);
 }

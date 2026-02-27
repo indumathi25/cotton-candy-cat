@@ -5,22 +5,14 @@ import uiReducer, {
     setSearchTerm,
     setCurrentPage,
     resetCourseFilters,
-    setScheduleViewMode,
-    toggleSidebar,
-    setSidebarOpen,
     selectSelectedGrade,
     selectSearchTerm,
     selectCurrentPage,
-    selectScheduleViewMode,
-    selectSidebarOpen,
     selectCourseFilter,
 } from './uiSlice';
 
-// ─── Store Helper ─────────────────────────────────────────────────────────────
 const makeStore = () =>
     configureStore({ reducer: { ui: uiReducer } });
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('uiSlice — course filters', () => {
     it('should return correct initial state', () => {
@@ -91,47 +83,3 @@ describe('uiSlice — course filters', () => {
     });
 });
 
-describe('uiSlice — schedule view mode', () => {
-    it('should default to grid view', () => {
-        const store = makeStore();
-        expect(selectScheduleViewMode(store.getState() as never)).toBe('grid');
-    });
-
-    it('setScheduleViewMode should switch to list', () => {
-        const store = makeStore();
-        store.dispatch(setScheduleViewMode('list'));
-        expect(selectScheduleViewMode(store.getState() as never)).toBe('list');
-    });
-
-    it('setScheduleViewMode should switch back to grid', () => {
-        const store = makeStore();
-        store.dispatch(setScheduleViewMode('list'));
-        store.dispatch(setScheduleViewMode('grid'));
-        expect(selectScheduleViewMode(store.getState() as never)).toBe('grid');
-    });
-});
-
-describe('uiSlice — sidebar', () => {
-    it('should default to closed', () => {
-        const store = makeStore();
-        expect(selectSidebarOpen(store.getState() as never)).toBe(false);
-    });
-
-    it('toggleSidebar should flip the boolean', () => {
-        const store = makeStore();
-        store.dispatch(toggleSidebar());
-        expect(selectSidebarOpen(store.getState() as never)).toBe(true);
-
-        store.dispatch(toggleSidebar());
-        expect(selectSidebarOpen(store.getState() as never)).toBe(false);
-    });
-
-    it('setSidebarOpen should set explicit value', () => {
-        const store = makeStore();
-        store.dispatch(setSidebarOpen(true));
-        expect(selectSidebarOpen(store.getState() as never)).toBe(true);
-
-        store.dispatch(setSidebarOpen(false));
-        expect(selectSidebarOpen(store.getState() as never)).toBe(false);
-    });
-});

@@ -7,8 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Component responsible for all business validation rules related to course
@@ -21,7 +23,6 @@ public class EnrollmentValidator {
 
     private final EnrollmentRepository enrollmentRepository;
     private final CourseHistoryRepository courseHistoryRepository;
-    private final CourseRepository courseRepository;
     private final PrerequisiteGraph prerequisiteGraph;
 
     /**
@@ -75,22 +76,24 @@ public class EnrollmentValidator {
         }
         log.info("Capacity check passed. Current capacity: {}/{}", currentCapacity, section.getCapacity());
 
-        // 6. Prerequisite Check (Recursive using DAG)
+        // 6. Prerequisite Check (Recursive using pre-built DAG)
         if (course.getPrerequisiteId() != null) {
-            log.info("Course {} has prerequisites. Building prerequisite graph...", course.getName());
-            prerequisiteGraph.buildGraph(courseRepository.findAll());
             List<Course> allPrereqs = prerequisiteGraph.getDeepPrerequisites(course.getId());
             log.info("Found {} recursive prerequisites for {}: {}", allPrereqs.size(), course.getName(), allPrereqs);
 
-            for (Course prereq : allPrereqs) {
-                boolean passed = courseHistoryRepository.existsByStudentIdAndCourseIdAndStatus(student.getId(),
-                        prereq.getId(), CourseStatus.passed);
-                if (!passed) {
-                    log.warn("Validation failed: Missing prerequisite {} for student {}", prereq.getName(),
-                            student.getId());
-                    return Optional.of("Missing prerequisite: " + prereq.getName() + " (" + prereq.getCode() + ")");
+            if (!allPrereqs.isEmpty()) {
+                // ✅ Single batch query instead of N queries in a loop
+                Set<Long> passedCourseIds = new HashSet<>(
+                        courseHistoryRepository.findPassedCourseIdsByStudentId(student.getId(), CourseStatus.passed));
+
+                for (Course prereq : allPrereqs) {
+                    if (!passedCourseIds.contains(prereq.getId())) {
+                        log.warn("Validation failed: Missing prerequisite {} for student {}", prereq.getName(),
+                                student.getId());
+                        return Optional.of("Missing prerequisite: " + prereq.getName() + " (" + prereq.getCode() + ")");
+                    }
+                    log.info("Verified prerequisite passed: {}", prereq.getName());
                 }
-                log.info("Verified prerequisite passed: {}", prereq.getName());
             }
         } else {
             log.info("Course {} has no prerequisites.", course.getName());

@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -24,9 +23,10 @@ public class CourseController {
     @GetMapping
     public PageResponse<CourseDto> getCourses(
             @RequestParam(required = false) @Min(1) Integer grade,
+            @RequestParam(required = false) String search,
             Pageable pageable) {
 
-        return PageResponse.of(courseService.getCourses(grade, pageable));
+        return PageResponse.of(courseService.getCourses(grade, search, pageable));
     }
 
     /**

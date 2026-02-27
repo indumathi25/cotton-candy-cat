@@ -34,12 +34,12 @@ public class CourseServiceImpl implements CourseService {
         private final com.maplewood.mapper.CourseMapper courseMapper;
 
         @Override
-        public Page<CourseDto> getCourses(Integer grade, Pageable pageable) {
-                Page<com.maplewood.model.Course> courses = (grade != null)
-                                ? courseRepository.findByGradeLevelMinLessThanEqualAndGradeLevelMaxGreaterThanEqual(
-                                                grade, grade, pageable)
-                                : courseRepository.findAll(pageable);
-
+        public Page<CourseDto> getCourses(Integer grade, String search, Pageable pageable) {
+                String searchPattern = (search != null && !search.trim().isEmpty())
+                                ? "%" + search.toLowerCase() + "%"
+                                : null;
+                Page<com.maplewood.model.Course> courses = courseRepository.findByFilters(grade, searchPattern,
+                                pageable);
                 return courses.map(courseMapper::toDto);
         }
 

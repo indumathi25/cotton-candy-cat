@@ -107,6 +107,7 @@ export const ACADEMIC_STANDING = [
     { minGpa: 0.0, text: 'Needs Improvement', color: 'text-red-600' },
 ] as const;
 
+
 export const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] as const;
 
 export const TIME_SLOTS = [

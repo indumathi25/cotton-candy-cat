@@ -3,7 +3,7 @@ package com.maplewood.service;
 import com.maplewood.dto.StudentCourseHistoryDTO;
 import com.maplewood.dto.StudentProfileDTO;
 import com.maplewood.dto.StudentScheduleDTO;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public interface StudentService {
     StudentProfileDTO getStudentProfile(@NonNull Long studentId);

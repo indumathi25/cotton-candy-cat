@@ -6,10 +6,13 @@ import { PageResponse } from '../types/api';
 /**
  * Fetches courses with optional grade filter and pagination
  */
-export const getCourses = async (grade?: number, page: number = 0, size: number = 20): Promise<PageResponse<Course>> => {
+export const getCourses = async (grade?: number, search?: string, page: number = 0, size: number = 20): Promise<PageResponse<Course>> => {
     const params: Record<string, string | number> = { page, size };
     if (grade) {
         params.grade = grade;
+    }
+    if (search) {
+        params.search = search;
     }
 
     const response = await apiClient.get<PageResponse<Course>>('/api/courses', { params: params as Record<string, string | number | boolean> });
