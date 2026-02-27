@@ -1,7 +1,5 @@
-import { useQuery, useMutation, useQueryClient, UseQueryResult, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { getCourses, getCourseSections, enrollInCourse, getCourseById } from '../api/courseService';
-import { Course } from '../types/course';
-import { PageResponse } from '../types/api';
 
 export const useCourses = (grade?: number, search?: string, size: number = 10) => {
     return useInfiniteQuery({
