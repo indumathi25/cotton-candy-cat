@@ -16,8 +16,8 @@ jobs:
         image: postgres:17
         env:
           POSTGRES_DB: maplewood
-          POSTGRES_USER: maplewood
-          POSTGRES_PASSWORD: maplewood
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: >-
@@ -39,8 +39,8 @@ jobs:
       - name: Test Backend
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/maplewood
-          DB_USERNAME: maplewood
-          DB_PASSWORD: maplewood
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
         run: |
           cd backend
           mvn -B test
