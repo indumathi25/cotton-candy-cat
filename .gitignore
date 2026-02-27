@@ -44,3 +44,6 @@ frontend/build/
 *.tfstate.backup
 .terraform.lock.hcl
 .secrets
+
+# k6 load test results
+k6/results.json

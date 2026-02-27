@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { CourseBrowser } from '../components/features/courses/CourseBrowser';
 import { StudentLayout } from '../components/layouts/StudentLayout';
 import { selectUser } from '../store/authSlice';
-import { setSelectedGrade, selectSelectedGrade } from '../store/uiSlice';
+import { setSelectedGrade, selectSelectedGrade, setSearchTerm, selectSearchTerm } from '../store/uiSlice';
 import {
     enrollStudent,
     selectNotifications,
@@ -27,6 +27,7 @@ export const CoursesPage: React.FC = () => {
 
     const user = useSelector(selectUser);
     const selectedGrade = useSelector(selectSelectedGrade);
+    const searchTerm = useSelector(selectSearchTerm);
     const notifications = useSelector(selectNotifications);
     const pendingSections = useSelector(selectPendingSections);
     const studentCourseHistory = useSelector(selectStudentHistory);
@@ -34,23 +35,26 @@ export const CoursesPage: React.FC = () => {
 
     const { data: profile, isLoading: profileLoading } = useStudentProfile(studentId);
 
-    // Fetch courses at the top level
+    // Fetch courses with infinite query support
     const {
-        data: coursesResponse,
+        data: coursesData,
         isLoading: coursesLoading,
         isError: coursesError,
         refetch: refetchCourses,
-    } = useCourses(selectedGrade || undefined, 0, 50);
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useCourses(selectedGrade || undefined, searchTerm || undefined);
+
+    // Flatten pages into a single courses list
+    const allCourses = coursesData?.pages.flatMap(page => page.content) || [];
 
     // Enrich courses with enrollment status
-    // React Compiler will memoize this automatically
-    const enrichedCourses = coursesResponse?.content
-        ? enrichCoursesWithEnrollmentStatus(
-            coursesResponse.content,
-            profile?.gradeLevel || 9,
-            studentCourseHistory
-        )
-        : [];
+    const enrichedCourses = enrichCoursesWithEnrollmentStatus(
+        allCourses,
+        profile?.gradeLevel || 9,
+        studentCourseHistory
+    );
 
     useEffect(() => {
         dispatch(fetchStudentHistory(studentId));
@@ -111,9 +115,14 @@ export const CoursesPage: React.FC = () => {
                 onRetry={refetchCourses}
                 selectedGrade={selectedGrade}
                 onGradeChange={(grade) => dispatch(setSelectedGrade(grade))}
+                searchTerm={searchTerm}
+                onSearchChange={(term) => dispatch(setSearchTerm(term))}
                 studentGradeLevel={profile?.gradeLevel || 9}
                 onEnroll={handleEnroll}
                 pendingCourseIds={pendingSections}
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                onLoadMore={fetchNextPage}
             />
         </StudentLayout>
     );

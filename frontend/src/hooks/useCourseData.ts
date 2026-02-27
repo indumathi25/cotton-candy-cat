@@ -1,13 +1,16 @@
-import { useQuery, useMutation, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { getCourses, getCourseSections, enrollInCourse, getCourseById } from '../api/courseService';
-import { Course } from '../types/course';
-import { PageResponse } from '../types/api';
 
-export const useCourses = (grade?: number, page: number = 0, size: number = 20): UseQueryResult<PageResponse<Course>, Error> => {
-    return useQuery({
-        queryKey: ['courses', grade, page, size],
-        queryFn: () => getCourses(grade, page, size),
-        staleTime: 5 * 60 * 1000, // 5 minutes
+export const useCourses = (grade?: number, search?: string, size: number = 10) => {
+    return useInfiniteQuery({
+        queryKey: ['courses', grade, search, size],
+        queryFn: ({ pageParam = 0 }) => getCourses(grade, search, pageParam, size),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage) => {
+            if (lastPage.page + 1 >= lastPage.totalPages || lastPage.content.length === 0) return undefined;
+            return lastPage.page + 1;
+        },
+        staleTime: 5 * 60 * 1000,
     });
 };
 

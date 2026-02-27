@@ -68,9 +68,10 @@ vi.mock('../components/features/courses/CourseBrowser', () => ({
 }));
 
 // ─── Imports after mocks ──────────────────────────────────────────────────────
-import { getCourseSections, enrollInCourse } from '../api/courseService';
+import { getCourses, getCourseSections, enrollInCourse } from '../api/courseService';
 import { getStudentProfile, getStudentHistory } from '../api/studentService';
 
+const mockGetCourses = vi.mocked(getCourses);
 const mockGetCourseSections = vi.mocked(getCourseSections);
 const mockEnrollInCourse = vi.mocked(enrollInCourse);
 const mockGetStudentProfile = vi.mocked(getStudentProfile);
@@ -94,7 +95,7 @@ const renderPage = () => {
                 isAuthenticated: true,
             },
             enrollment: { pendingSections: [], enrolledSectionIds: [], status: 'idle' as const, error: null, notifications: [] },
-            ui: { courseFilter: { selectedGrade: null, searchTerm: '', currentPage: 0, pageSize: 20 }, scheduleViewMode: 'grid' as const, sidebarOpen: false },
+            ui: { courseFilter: { selectedGrade: null, searchTerm: '', currentPage: 0, pageSize: 20 } },
             student: { history: mockHistory, historyStatus: 'succeeded' as const, historyError: null },
         },
     });
@@ -117,6 +118,7 @@ describe('CoursesPage — integration tests', () => {
         vi.clearAllMocks();
         mockGetStudentProfile.mockResolvedValue(mockProfile);
         mockGetStudentHistory.mockResolvedValue(mockHistory);
+        mockGetCourses.mockResolvedValue({ content: [], page: 0, totalPages: 1, totalElements: 0 } as never);
     });
 
     it('should show loading skeleton while profile loads', () => {

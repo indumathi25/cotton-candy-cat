@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 @Data
 @NoArgsConstructor

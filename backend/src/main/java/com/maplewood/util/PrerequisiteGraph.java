@@ -3,7 +3,6 @@ package com.maplewood.util;
 import com.maplewood.model.Course;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
 import java.util.*;
 
 /**
@@ -13,27 +12,23 @@ import java.util.*;
 @Slf4j
 @Component
 public class PrerequisiteGraph {
-    // Adjacency list: Course ID -> List of dependent Course IDs
     private final Map<Long, List<Long>> adjList = new HashMap<>();
 
-    // Indegree: Course ID -> Number of prerequisites
     private final Map<Long, Integer> indegree = new HashMap<>();
 
-    // Storage for course objects for quick retrieval
     private final Map<Long, Course> courseMap = new HashMap<>();
 
-    // Reverse lookup: Course ID -> Prerequisite ID
     private final Map<Long, Long> prerequisites = new HashMap<>();
 
-    /**
-     * Initializes the graph from a list of courses.
-     */
+    private final Map<Long, List<Course>> deepPrerequisitesCache = new HashMap<>();
+
     public void buildGraph(List<Course> courses) {
         log.info("Building Prerequisite Graph from {} courses", courses.size());
         adjList.clear();
         indegree.clear();
         courseMap.clear();
         prerequisites.clear();
+        deepPrerequisitesCache.clear();
 
         // 1. Initialize courseMap and indegree (all courses start with 0)
         for (Course course : courses) {
@@ -59,7 +54,55 @@ public class PrerequisiteGraph {
                 prerequisites.put(courseId, prereqId);
             }
         }
-        log.info("Graph built. Edges: {}", prerequisites.size());
+
+        // 3. ✅ Pre-compute deep prerequisites for every course with prerequisites
+        for (Course course : courses) {
+            if (course.getPrerequisiteId() != null) {
+                deepPrerequisitesCache.put(course.getId(), computeDeepPrerequisites(course.getId()));
+            }
+        }
+        log.info("Graph built. Edges: {}. Deep prerequisite cache populated for {} courses.",
+                prerequisites.size(), deepPrerequisitesCache.size());
+
+        // Log the full cache as a single summary
+        String cacheSummary = deepPrerequisitesCache.entrySet().stream()
+                .map(e -> {
+                    String name = courseMap.containsKey(e.getKey()) ? courseMap.get(e.getKey()).getName()
+                            : "ID:" + e.getKey();
+                    String chain = e.getValue().stream().map(Course::getName)
+                            .collect(java.util.stream.Collectors.joining(" → "));
+                    return name + " [" + chain + "]";
+                })
+                .collect(java.util.stream.Collectors.joining(", "));
+        log.info("Prerequisite cache: {}", cacheSummary);
+    }
+
+    /**
+     * Internal traversal called once at startup per course.
+     * If a cycle is detected, logs a warning and returns the prerequisites found so
+     * far rather than crashing the application.
+     */
+    private List<Course> computeDeepPrerequisites(Long courseId) {
+        List<Course> allPrereqs = new ArrayList<>();
+        Set<Long> visited = new HashSet<>();
+        Long currentPrereqId = prerequisites.get(courseId);
+
+        while (currentPrereqId != null) {
+            if (visited.contains(currentPrereqId)) {
+                log.warn("Circular prerequisite chain detected for course ID {}. Skipping cycle at ID: {}. " +
+                        "This course will be blocked from enrollment.", courseId, currentPrereqId);
+                break; // stop traversal instead of crashing
+            }
+            visited.add(currentPrereqId);
+            Course prereq = courseMap.get(currentPrereqId);
+            if (prereq != null) {
+                allPrereqs.add(prereq);
+                currentPrereqId = prerequisites.get(currentPrereqId);
+            } else {
+                break;
+            }
+        }
+        return allPrereqs;
     }
 
     /**
@@ -136,27 +179,11 @@ public class PrerequisiteGraph {
     }
 
     /**
-     * Returns all prerequisites for a specific course, including transitively.
-     * E.g. If C requires B and B requires A, getDeepPrerequisites(C) returns [B,
-     * A].
+     * ✅ O(1) cache lookup — returns the pre-computed deep prerequisites for a
+     * course.
+     * The traversal is done once at startup by buildGraph().
      */
     public List<Course> getDeepPrerequisites(Long courseId) {
-        log.info("Resolving deep prerequisites for Course ID: {}", courseId);
-        List<Course> allPrereqs = new ArrayList<>();
-        Long currentPrereqId = prerequisites.get(courseId);
-
-        while (currentPrereqId != null) {
-            Course prereq = courseMap.get(currentPrereqId);
-            if (prereq != null) {
-                log.info("  -> Found prerequisite: {} (ID: {})", prereq.getName(), prereq.getId());
-                allPrereqs.add(prereq);
-                currentPrereqId = prerequisites.get(currentPrereqId);
-            } else {
-                log.warn("  -> Prerequisite ID {} found in map but missing from courseMap!", currentPrereqId);
-                break;
-            }
-        }
-        log.info("Total prerequisites found for Course {}: {}", courseId, allPrereqs.size());
-        return allPrereqs;
+        return deepPrerequisitesCache.getOrDefault(courseId, Collections.emptyList());
     }
 }

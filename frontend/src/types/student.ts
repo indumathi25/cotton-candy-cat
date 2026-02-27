@@ -24,7 +24,7 @@ export interface StudentEnrollment {
     semesterOrder: number;
     grade?: string;
     credits: number;
-    status: 'active' | 'completed' | 'dropped';
+    status: 'active' | 'passed' | 'failed' | 'dropped' | 'completed';
 }
 
 export interface StudentCourseHistory {
