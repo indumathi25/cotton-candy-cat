@@ -6,7 +6,6 @@ export const useStudentProfile = (id: number): UseQueryResult<StudentProfile, Er
     return useQuery({
         queryKey: ['student', 'profile', id],
         queryFn: () => getStudentProfile(id),
-        retry: 1,
     });
 };
 
@@ -14,7 +13,6 @@ export const useStudentSchedule = (id: number): UseQueryResult<StudentSchedule, 
     return useQuery({
         queryKey: ['student', 'schedule', id],
         queryFn: () => getStudentSchedule(id),
-        retry: 1,
     });
 };
 
@@ -22,7 +20,6 @@ export const useStudentHistory = (id: number): UseQueryResult<StudentCourseHisto
     return useQuery({
         queryKey: ['student', 'history', id],
         queryFn: () => getStudentHistory(id),
-        retry: 1,
     });
 };
 
@@ -30,6 +27,5 @@ export const useGradeReport = (id: number): UseQueryResult<GradeReport, Error> =
     return useQuery({
         queryKey: ['student', 'grades', id],
         queryFn: () => getGradeReport(id),
-        retry: 1,
     });
 };
