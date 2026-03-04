@@ -423,6 +423,90 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         private void populateStudentsAndHistory(List<Course> courses, List<Semester> semesters) {
+                Map<String, Course> courseMap = courses.stream().collect(Collectors.toMap(Course::getCode, c -> c));
+                List<Semester> historySemesters = semesters.stream().filter(s -> s.getYear() < 2024).toList();
+
+                // ─── DEMO STUDENTS (IDs 1–4) ────────────────────────────────────────────────
+                // These are inserted first so they get predictable low IDs for demo purposes.
+
+                // Student 1 – Emma Wilson (Grade 12). Has all English prerequisites up to
+                // ENG302 passed, so she CAN enroll in ENG401 (Scenario 1: ✅ valid enroll).
+                Student emma = studentRepository.save(new Student(null, "Emma", "Wilson",
+                                "emma.wilson@student.maplewood.edu", 12, 2020, 2024, LocalDateTime.now()));
+                List<CourseHistory> demoHistories = new ArrayList<>();
+                List<String> emmaCourses = List.of("ENG101", "ENG102", "ENG201", "ENG202", "ENG301", "ENG302");
+                for (int i = 0; i < emmaCourses.size(); i++) {
+                        demoHistories.add(new CourseHistory(null, emma,
+                                        courseMap.get(emmaCourses.get(i)),
+                                        historySemesters.get(i % historySemesters.size()),
+                                        null, CourseStatus.passed, LocalDateTime.now()));
+                }
+
+                // Student 2 – James Lee (Grade 9). No course history at all, so he CANNOT
+                // enroll in MAT402/AP Calculus BC (Scenario 2: ❌ prerequisite not met).
+                studentRepository.save(new Student(null, "James", "Lee",
+                                "james.lee@student.maplewood.edu", 9, 2024, 2028, LocalDateTime.now()));
+
+                // Student 3 – Alex Chen (Grade 11). Has SCI101 passed so they CAN enroll in
+                // SCI201 (Chemistry I). SCI301 (Physics I) also has a section — both share a
+                // Thursday 09:30 slot — triggering Scenario 3: ❌ time conflict.
+                Student alex = studentRepository.save(new Student(null, "Alex", "Chen",
+                                "alex.chen@student.maplewood.edu", 11, 2022, 2026, LocalDateTime.now()));
+                demoHistories.add(new CourseHistory(null, alex, courseMap.get("SCI101"),
+                                historySemesters.get(0), null, CourseStatus.passed, LocalDateTime.now()));
+                // MAT201 is also required for SCI301
+                demoHistories.add(new CourseHistory(null, alex, courseMap.get("MAT101"),
+                                historySemesters.get(0), null, CourseStatus.passed, LocalDateTime.now()));
+                demoHistories.add(new CourseHistory(null, alex, courseMap.get("MAT201"),
+                                historySemesters.get(1), null, CourseStatus.passed, LocalDateTime.now()));
+
+                // Student 4 – Maya Patel (Grade 11). Given 5 active section enrollments in
+                // populateEnrollments so any further enroll attempt hits the 5-course cap
+                // (Scenario 4: ❌ max courses reached).
+                studentRepository.save(new Student(null, "Maya", "Patel",
+                                "maya.patel@student.maplewood.edu", 11, 2022, 2026, LocalDateTime.now()));
+
+                courseHistoryRepository.saveAll(demoHistories);
+                // ─── END DEMO STUDENTS ───────────────────────────────────────────────────────
+
+                List<CourseHistory> extraDemoHistories = new ArrayList<>();
+
+                // ─── FILLER: pad IDs 5–100 ────────────────────────────────────────────────
+                List<Student> fillers1 = new ArrayList<>();
+                for (int i = 5; i <= 100; i++) {
+                        fillers1.add(new Student(null, "Filler", "Student" + i,
+                                        "filler" + i + "@student.maplewood.edu",
+                                        10, 2022, 2026, LocalDateTime.now()));
+                }
+                studentRepository.saveAll(fillers1);
+
+                // Student 101 – Alex Rivera (Grade 11). Has ART101 + ART201 passed, so
+                // they CAN enroll in Art III: Sculpture (deep prereq chain). ✅
+                Student alexRivera = studentRepository.save(new Student(null, "Alex", "Rivera",
+                                "alex.rivera@student.maplewood.edu", 11, 2022, 2026, LocalDateTime.now()));
+                extraDemoHistories.add(new CourseHistory(null, alexRivera, courseMap.get("ART101"),
+                                historySemesters.get(0), null, CourseStatus.passed, LocalDateTime.now()));
+                extraDemoHistories.add(new CourseHistory(null, alexRivera, courseMap.get("ART201"),
+                                historySemesters.get(1), null, CourseStatus.passed, LocalDateTime.now()));
+
+                // ─── FILLER: pad IDs 102–109 ───────────────────────────────────────────────
+                List<Student> fillers2 = new ArrayList<>();
+                for (int i = 102; i <= 109; i++) {
+                        fillers2.add(new Student(null, "Filler", "Student" + i,
+                                        "filler" + i + "@student.maplewood.edu",
+                                        10, 2022, 2026, LocalDateTime.now()));
+                }
+                studentRepository.saveAll(fillers2);
+
+                // Student 110 – Sam Wong (Grade 10). No CYC102 in history, so the backend's
+                // prerequisite graph traversal hits the circular dependency CYC101↔CYC102
+                // and throws a 500 error. ❌
+                studentRepository.save(new Student(null, "Sam", "Wong",
+                                "sam.wong@student.maplewood.edu", 10, 2023, 2027, LocalDateTime.now()));
+
+                courseHistoryRepository.saveAll(extraDemoHistories);
+
+                // ─── Bulk random students: IDs 111+ ─────────────────────────────────────
                 List<Student> students = new ArrayList<>();
                 for (int grade : List.of(9, 10, 11, 12)) {
                         for (int i = 0; i < 100; i++) {
@@ -438,10 +522,7 @@ public class DataInitializer implements CommandLineRunner {
                 }
                 List<Student> saved = studentRepository.saveAll(students);
 
-                Map<String, Course> courseMap = courses.stream().collect(Collectors.toMap(Course::getCode, c -> c));
-                List<Semester> historySemesters = semesters.stream().filter(s -> s.getYear() < 2024).toList();
-                List<CourseHistory> histories = new ArrayList<>();
-
+                List<CourseHistory> randomHistories = new ArrayList<>();
                 for (int i = 0; i < saved.size(); i++) {
                         Student s = saved.get(i);
                         int compSem = (s.getGradeLevel() - 9) * 2;
@@ -465,24 +546,14 @@ public class DataInitializer implements CommandLineRunner {
                                 for (Course c : toTake) {
                                         CourseStatus status = (random.nextDouble() < 0.85) ? CourseStatus.passed
                                                         : CourseStatus.failed;
-                                        histories.add(new CourseHistory(null, s, c, sem, null, status,
+                                        randomHistories.add(new CourseHistory(null, s, c, sem, null, status,
                                                         LocalDateTime.now()));
                                         if (status == CourseStatus.passed)
                                                 completedIds.add(c.getId());
                                 }
                         }
-                        if (i == 100) { // Student 101
-                                if (!completedIds.contains(courseMap.get("ART101").getId()))
-                                        histories.add(new CourseHistory(null, s, courseMap.get("ART101"),
-                                                        historySemesters.get(0), null,
-                                                        CourseStatus.passed, LocalDateTime.now()));
-                                if (!completedIds.contains(courseMap.get("ART201").getId()))
-                                        histories.add(new CourseHistory(null, s, courseMap.get("ART201"),
-                                                        historySemesters.get(1), null,
-                                                        CourseStatus.passed, LocalDateTime.now()));
-                        }
                 }
-                courseHistoryRepository.saveAll(histories);
+                courseHistoryRepository.saveAll(randomHistories);
         }
 
         private List<CourseSection> populateSections(List<Course> courses, List<Teacher> teachers,
@@ -532,13 +603,21 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         private void populateEnrollments(List<CourseSection> sections) {
-                Optional<Student> student101 = studentRepository.findById(101L);
-                if (student101.isPresent()) {
+                // Student 4 – Maya Patel: pre-enroll in 5 sections to trigger the max-courses
+                // cap (Scenario 4)
+                studentRepository.findById(4L).ifPresent(maya -> {
+                        List<CourseSection> subset = sections.stream().limit(5).toList();
+                        subset.forEach(s -> enrollmentRepository
+                                        .save(new Enrollment(null, maya, s, LocalDateTime.now(), null)));
+                });
+
+                // Student 101 – minimal seed enrollments (2 courses)
+                studentRepository.findById(101L).ifPresent(student101 -> {
                         List<CourseSection> subset = sections.stream()
                                         .filter(s -> !s.getCourse().getCode().startsWith("ART"))
                                         .limit(2).toList();
                         subset.forEach(s -> enrollmentRepository
-                                        .save(new Enrollment(null, student101.get(), s, LocalDateTime.now(), null)));
-                }
+                                        .save(new Enrollment(null, student101, s, LocalDateTime.now(), null)));
+                });
         }
 }

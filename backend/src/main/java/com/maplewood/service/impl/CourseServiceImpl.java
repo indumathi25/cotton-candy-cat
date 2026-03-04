@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class CourseServiceImpl implements CourseService {
 
         private final CourseRepository courseRepository;
@@ -34,6 +36,7 @@ public class CourseServiceImpl implements CourseService {
         private final com.maplewood.mapper.CourseMapper courseMapper;
 
         @Override
+        @org.springframework.cache.annotation.Cacheable(value = "courses", key = "{#grade, #search, #pageable.pageNumber, #pageable.pageSize}")
         public Page<CourseDto> getCourses(Integer grade, String search, Pageable pageable) {
                 String searchPattern = (search != null && !search.trim().isEmpty())
                                 ? "%" + search.toLowerCase() + "%"
@@ -60,10 +63,15 @@ public class CourseServiceImpl implements CourseService {
                                                 row -> (Long) row[0],
                                                 row -> (Long) row[1]));
 
-                return sections.stream()
-                                .map(section -> courseSectionMapper.toDto(
-                                                section,
-                                                enrollmentCounts.getOrDefault(section.getId(), 0L)))
-                                .collect(Collectors.toList());
+                try {
+                        return sections.stream()
+                                        .map(section -> courseSectionMapper.toDto(
+                                                        section,
+                                                        enrollmentCounts.getOrDefault(section.getId(), 0L)))
+                                        .collect(Collectors.toList());
+                } catch (Exception e) {
+                        log.error("Failed to map course sections to DTOs", e);
+                        throw new RuntimeException("Error occurred during section mapping", e);
+                }
         }
 }

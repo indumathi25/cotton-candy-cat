@@ -101,10 +101,13 @@ public class EnrollmentServiceImplTest {
                 savedEnrollment.setCourseSection(section);
                 when(enrollmentRepository.save(any(Enrollment.class))).thenReturn(savedEnrollment);
 
-                EnrollmentResponseDTO expectedResponse = EnrollmentResponseDTO.builder()
-                                .status("SUCCESS")
-                                .message("Successfully enrolled")
-                                .build();
+                EnrollmentResponseDTO expectedResponse = new EnrollmentResponseDTO(
+                                null, // enrollmentId
+                                "John Doe",
+                                "Algebra I",
+                                "Fall 2024",
+                                "SUCCESS",
+                                "Successfully enrolled");
                 when(enrollmentMapper.toEnrollmentResponseDTO(any(Enrollment.class), anyString()))
                                 .thenReturn(expectedResponse);
 
@@ -112,7 +115,7 @@ public class EnrollmentServiceImplTest {
                 EnrollmentResponseDTO response = enrollmentService.enrollStudent(request);
 
                 // Assert
-                assertEquals("SUCCESS", response.getStatus());
+                assertEquals("SUCCESS", response.status());
                 verify(enrollmentRepository, times(1)).save(any(Enrollment.class));
         }
 
@@ -127,18 +130,21 @@ public class EnrollmentServiceImplTest {
                 String errorMsg = "Maximum course limit reached";
                 when(enrollmentValidator.validate(student, section, activeSemester)).thenReturn(Optional.of(errorMsg));
 
-                EnrollmentResponseDTO errorResponse = EnrollmentResponseDTO.builder()
-                                .status("FAILED")
-                                .message(errorMsg)
-                                .build();
+                EnrollmentResponseDTO errorResponse = new EnrollmentResponseDTO(
+                                null,
+                                "John Doe",
+                                "Algebra I",
+                                null,
+                                "FAILED",
+                                errorMsg);
                 when(enrollmentMapper.toErrorResponse(student, section, errorMsg)).thenReturn(errorResponse);
 
                 // Act
                 EnrollmentResponseDTO response = enrollmentService.enrollStudent(request);
 
                 // Assert
-                assertEquals("FAILED", response.getStatus());
-                assertEquals(errorMsg, response.getMessage());
+                assertEquals("FAILED", response.status());
+                assertEquals(errorMsg, response.message());
                 verify(enrollmentRepository, never()).save(any());
         }
 }

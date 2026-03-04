@@ -63,11 +63,11 @@ class StudentMapperTest {
         StudentProfileDTO dto = studentMapper.toProfileDTO(student, passedCourses, creditsToGraduate, gpa);
 
         // Assert
-        assertEquals(1L, dto.getId());
-        assertEquals("John Doe", dto.getFullName());
-        assertEquals(3, dto.getCreditsEarned());
-        assertEquals(117, dto.getRemainingCredits());
-        assertEquals(2.5, dto.getProgressPercentage());
+        assertEquals(1L, dto.id());
+        assertEquals("John Doe", dto.fullName());
+        assertEquals(3, dto.creditsEarned());
+        assertEquals(117, dto.remainingCredits());
+        assertEquals(2.5, dto.progressPercentage());
 
         verify(academicCalculator).calculateCreditsEarned(passedCourses);
         verify(academicCalculator).calculateRemainingCredits(creditsToGraduate, 3);

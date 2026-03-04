@@ -1,14 +1,10 @@
 package com.maplewood.dto;
 
-import lombok.Builder;
-import lombok.Data;
 import java.util.List;
 
-@Data
-@Builder
-public class StudentScheduleDTO {
-    private Long studentId;
-    private String studentName;
-    private String semesterName;
-    private List<ScheduleItemDTO> schedule;
+public record StudentScheduleDTO(
+        Long studentId,
+        String studentName,
+        String semesterName,
+        List<ScheduleItemDTO> schedule) {
 }

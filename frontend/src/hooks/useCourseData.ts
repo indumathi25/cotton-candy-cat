@@ -10,7 +10,8 @@ export const useCourses = (grade?: number, search?: string, size: number = 10) =
             if (lastPage.page + 1 >= lastPage.totalPages || lastPage.content.length === 0) return undefined;
             return lastPage.page + 1;
         },
-        staleTime: 5 * 60 * 1000,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000,    // 10 minutes (keep in memory longer)
     });
 };
 
