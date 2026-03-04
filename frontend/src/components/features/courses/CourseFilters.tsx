@@ -16,7 +16,20 @@ export const CourseFilters: React.FC<CourseFiltersProps> = ({
     searchTerm,
     onSearchChange,
 }) => {
-    const grades = GRADE_LEVELS;
+    const [localSearch, setLocalSearch] = React.useState(searchTerm);
+    const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Sync local state when Redux is cleared externally, and clean up timer on unmount
+    React.useEffect(() => {
+        setLocalSearch(searchTerm);
+        return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+    }, [searchTerm]);
+
+    const handleSearchInput = (value: string) => {
+        setLocalSearch(value);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => onSearchChange(value), 600);
+    };
 
     return (
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 space-y-4">
@@ -32,12 +45,15 @@ export const CourseFilters: React.FC<CourseFiltersProps> = ({
                             id="course-search"
                             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all"
                             placeholder="Search by course name or code..."
-                            value={searchTerm}
-                            onChange={(e) => onSearchChange(e.target.value)}
+                            value={localSearch}
+                            onChange={(e) => handleSearchInput(e.target.value)}
                         />
-                        {searchTerm && (
+                        {localSearch && (
                             <button
-                                onClick={() => onSearchChange('')}
+                                onClick={() => {
+                                    setLocalSearch('');
+                                    onSearchChange('');
+                                }}
                                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                             >
                                 ✕
@@ -60,7 +76,7 @@ export const CourseFilters: React.FC<CourseFiltersProps> = ({
                     >
                         All Grades
                     </button>
-                    {grades.map(grade => (
+                    {GRADE_LEVELS.map(grade => (
                         <button
                             key={grade}
                             onClick={() => onGradeChange(grade)}

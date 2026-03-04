@@ -60,6 +60,8 @@ export const CoursesPage: React.FC = () => {
         dispatch(fetchStudentHistory(studentId));
     }, [dispatch, studentId]);
 
+    const handleSearchChange = (term: string) => dispatch(setSearchTerm(term));
+
     const handleEnroll = async (courseId: number) => {
         if (!user?.studentId) return;
 
@@ -116,7 +118,7 @@ export const CoursesPage: React.FC = () => {
                 selectedGrade={selectedGrade}
                 onGradeChange={(grade) => dispatch(setSelectedGrade(grade))}
                 searchTerm={searchTerm}
-                onSearchChange={(term) => dispatch(setSearchTerm(term))}
+                onSearchChange={handleSearchChange}
                 studentGradeLevel={profile?.gradeLevel || 9}
                 onEnroll={handleEnroll}
                 pendingCourseIds={pendingSections}

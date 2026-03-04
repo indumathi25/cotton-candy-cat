@@ -82,7 +82,7 @@ public class EnrollmentValidator {
             log.info("Found {} recursive prerequisites for {}: {}", allPrereqs.size(), course.getName(), allPrereqs);
 
             if (!allPrereqs.isEmpty()) {
-                // ✅ Single batch query instead of N queries in a loop
+                // Single batch query instead of N queries in a loop
                 Set<Long> passedCourseIds = new HashSet<>(
                         courseHistoryRepository.findPassedCourseIdsByStudentId(student.getId(), CourseStatus.passed));
 

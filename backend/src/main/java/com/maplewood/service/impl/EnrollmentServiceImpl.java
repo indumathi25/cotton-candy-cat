@@ -36,11 +36,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         @Override
         @Transactional
         public EnrollmentResponseDTO enrollStudent(EnrollmentRequestDTO request) {
-                log.info("Attempting to enroll student {} in section {}", request.getStudentId(),
-                                request.getCourseSectionId());
+                log.info("Attempting to enroll student {} in section {}", request.studentId(),
+                                request.courseSectionId());
 
-                Student student = fetchStudent(request.getStudentId());
-                CourseSection section = fetchCourseSection(request.getCourseSectionId());
+                Student student = fetchStudent(request.studentId());
+                CourseSection section = fetchCourseSection(request.courseSectionId());
                 Semester activeSemester = fetchActiveSemester();
 
                 // Delegate all validation business rules to the validator

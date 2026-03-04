@@ -10,6 +10,7 @@ import org.springframework.boot.persistence.autoconfigure.EntityScan;
 @ComponentScan("com.maplewood")
 @EnableJpaRepositories("com.maplewood.repository")
 @EntityScan("com.maplewood.model")
+@org.springframework.cache.annotation.EnableCaching
 public class Application {
 
     public static void main(String[] args) {

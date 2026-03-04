@@ -12,9 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -53,8 +51,13 @@ public class SecurityIntegrationTest {
     @Test
     void testEnrollEndpoint_AuthenticatedStudent_Returns200() throws Exception {
         EnrollmentRequestDTO request = new EnrollmentRequestDTO(1L, 1L);
-        EnrollmentResponseDTO response = new EnrollmentResponseDTO();
-        response.setStatus("SUCCESS");
+        EnrollmentResponseDTO response = new EnrollmentResponseDTO(
+                null,
+                "Student Name",
+                "Course Name",
+                "Semester Name",
+                "SUCCESS",
+                "Successfully enrolled");
 
         when(enrollmentService.enrollStudent(any(EnrollmentRequestDTO.class))).thenReturn(response);
 

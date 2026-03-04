@@ -69,9 +69,13 @@ public class PrerequisiteGraph {
                 .map(e -> {
                     String name = courseMap.containsKey(e.getKey()) ? courseMap.get(e.getKey()).getName()
                             : "ID:" + e.getKey();
-                    String chain = e.getValue().stream().map(Course::getName)
+                    List<Course> chain = e.getValue();
+                    String chainNames = chain.stream().map(Course::getName)
                             .collect(java.util.stream.Collectors.joining(" → "));
-                    return name + " [" + chain + "]";
+
+                    // Demonstration of SequencedCollection methods (Java 25)
+                    String first = chain.isEmpty() ? "None" : chain.getFirst().getName();
+                    return name + " (Primary Prereq: " + first + ") [" + chainNames + "]";
                 })
                 .collect(java.util.stream.Collectors.joining(", "));
         log.info("Prerequisite cache: {}", cacheSummary);

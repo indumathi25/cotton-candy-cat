@@ -15,74 +15,73 @@ import org.slf4j.LoggerFactory;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+        private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
-            IllegalArgumentException ex) {
-        log.warn("Bad request: {}", ex.getMessage());
-        return buildResponse(
-                HttpStatus.BAD_REQUEST,
-                ex.getMessage(),
-                null,
-                null);
-    }
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+                        IllegalArgumentException ex) {
+                log.warn("Bad request: {}", ex.getMessage());
+                return buildResponse(
+                                HttpStatus.BAD_REQUEST,
+                                ex.getMessage(),
+                                null,
+                                null);
+        }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
-            ResourceNotFoundException ex) {
-        log.warn("Resource not found: {}", ex.getMessage());
-        return buildResponse(
-                HttpStatus.NOT_FOUND,
-                ex.getMessage(),
-                null,
-                null);
-    }
+        @ExceptionHandler(ResourceNotFoundException.class)
+        public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
+                        ResourceNotFoundException ex) {
+                log.warn("Resource not found: {}", ex.getMessage());
+                return buildResponse(
+                                HttpStatus.NOT_FOUND,
+                                ex.getMessage(),
+                                null,
+                                null);
+        }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(
-            MethodArgumentNotValidException ex) {
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ErrorResponse> handleValidationException(
+                        MethodArgumentNotValidException ex) {
 
-        Map<String, String> fieldErrors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .collect(Collectors.toMap(
-                        FieldError::getField,
-                        FieldError::getDefaultMessage,
-                        (existing, replacement) -> existing));
+                Map<String, String> fieldErrors = ex.getBindingResult()
+                                .getFieldErrors()
+                                .stream()
+                                .collect(Collectors.toMap(
+                                                FieldError::getField,
+                                                FieldError::getDefaultMessage,
+                                                (existing, replacement) -> existing));
 
-        return buildResponse(
-                HttpStatus.BAD_REQUEST,
-                "Validation failed",
-                fieldErrors,
-                null);
-    }
+                return buildResponse(
+                                HttpStatus.BAD_REQUEST,
+                                "Validation failed",
+                                fieldErrors,
+                                null);
+        }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
-        log.error("Unhandled exception: ", ex);
-        return buildResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "An unexpected error occurred",
-                null,
-                ex.getMessage());
-    }
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
+                log.error("Unhandled exception: ", ex);
+                return buildResponse(
+                                HttpStatus.INTERNAL_SERVER_ERROR,
+                                "An unexpected error occurred",
+                                null,
+                                ex.getMessage());
+        }
 
-    private ResponseEntity<ErrorResponse> buildResponse(
-            HttpStatus status,
-            String message,
-            Map<String, String> errors,
-            String details) {
+        private ResponseEntity<ErrorResponse> buildResponse(
+                        HttpStatus status,
+                        String message,
+                        Map<String, String> errors,
+                        String details) {
 
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(status.value())
-                .error(status.getReasonPhrase())
-                .message(message)
-                .errors(errors)
-                .details(details)
-                .build();
+                ErrorResponse response = new ErrorResponse(
+                                LocalDateTime.now(),
+                                status.value(),
+                                status.getReasonPhrase(),
+                                message,
+                                errors,
+                                details);
 
-        return ResponseEntity.status(status).body(response);
-    }
+                return ResponseEntity.status(status).body(response);
+        }
 }

@@ -24,11 +24,15 @@ public class AcademicCalculator {
         double totalCredits = 0.0;
 
         for (CourseHistory record : history) {
-            double points = resolveGradePoints(record);
-            double credits = record.getCourse().getCredits();
+            try {
+                double points = resolveGradePoints(record);
+                double credits = record.getCourse().getCredits();
 
-            totalPoints += points * credits;
-            totalCredits += credits;
+                totalPoints += points * credits;
+                totalCredits += credits;
+            } catch (Exception e) {
+                // Ignore invalid records
+            }
         }
 
         return totalCredits == 0 ? 0.0 : totalPoints / totalCredits;
